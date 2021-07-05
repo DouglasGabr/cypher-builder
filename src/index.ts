@@ -1,6 +1,9 @@
 import { StringBuilder } from './BaseBuilder';
 import { ParametersBag } from './ParametersBag';
-import { Pattern, PatternBuilder } from './patterns/PatternBuilder';
+import {
+  PatternBuilder,
+  PatternStringBuilder,
+} from './patterns/PatternBuilder';
 export * from './CypherBuilderTypes';
 
 export {
@@ -12,8 +15,11 @@ export class Builder {
   private parametersBag = new ParametersBag();
   private clauses: StringBuilder[] = [];
 
-  match(builder: (patternBuilder: Pattern) => any) {
-    const patternBuilder = new PatternBuilder(this.parametersBag, 'MATCH ');
+  match(builder: (patternBuilder: PatternBuilder) => any) {
+    const patternBuilder = new PatternStringBuilder(
+      this.parametersBag,
+      'MATCH ',
+    );
     builder(patternBuilder);
     this.clauses.push(patternBuilder);
     return this;

@@ -11,7 +11,7 @@ import {
   RelationshipLimits,
 } from './Relationship';
 
-export class Pattern {
+export class PatternBuilder {
   protected prefix: string;
   protected parametersBag: ParametersBag;
   protected patterns: StringBuilder[] = [];
@@ -34,7 +34,7 @@ export class Pattern {
       _properties = Object.entries(properties).reduce(
         (newProperties, [label, value]) => ({
           ...newProperties,
-          [label]: this.parametersBag.add(value),
+          [label]: this.parametersBag.add(value, true),
         }),
         {} as Record<string, string>,
       );
@@ -63,7 +63,7 @@ export class Pattern {
       _properties = Object.entries(properties).reduce(
         (newProperties, [label, value]) => ({
           ...newProperties,
-          [label]: this.parametersBag.add(value),
+          [label]: this.parametersBag.add(value, true),
         }),
         {} as Record<string, string>,
       );
@@ -75,7 +75,10 @@ export class Pattern {
   }
 }
 
-export class PatternBuilder extends Pattern implements StringBuilder {
+export class PatternStringBuilder
+  extends PatternBuilder
+  implements StringBuilder
+{
   build() {
     return this.prefix + this.patterns.map((p) => p.build()).join('');
   }
