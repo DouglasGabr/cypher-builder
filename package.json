@@ -1,0 +1,32 @@
+{
+  "name": "cypher-builder",
+  "version": "1.0.0",
+  "description": "Fluent CQL builder for Neo4j",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DouglasGabr/cypher-builder.git"
+  },
+  "keywords": [
+    "cql",
+    "cypher",
+    "neo4j",
+    "query",
+    "builder"
+  ],
+  "author": "Douglas Francisco Gabriel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DouglasGabr/cypher-builder/issues"
+  },
+  "homepage": "https://github.com/DouglasGabr/cypher-builder#readme",
+  "devDependencies": {
+    "neo4j-driver": "^4.3.1",
+    "prettier": "2.3.2",
+    "typescript": "^4.3.5"
+  }
+}
