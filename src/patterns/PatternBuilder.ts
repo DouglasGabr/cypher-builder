@@ -1,6 +1,6 @@
 import { StringBuilder } from '../BaseBuilder';
 import { Node } from './Node';
-import { ParametersBag } from '../ParametersBag';
+import { ParametersBag } from '../parameters/ParametersBag';
 import {
   CypherBuilderLabelsAndTypes,
   CypherBuilderProperties,
@@ -12,12 +12,10 @@ import {
 } from './Relationship';
 
 export class PatternBuilder {
-  protected prefix: string;
   protected parametersBag: ParametersBag;
   protected patterns: StringBuilder[] = [];
-  constructor(parametersBag?: ParametersBag, prefix?: string) {
+  constructor(parametersBag?: ParametersBag) {
     this.parametersBag = parametersBag ?? new ParametersBag();
-    this.prefix = prefix ?? '';
   }
 
   node<
@@ -80,6 +78,6 @@ export class PatternStringBuilder
   implements StringBuilder
 {
   build() {
-    return this.prefix + this.patterns.map((p) => p.build()).join('');
+    return this.patterns.map((p) => p.build()).join('');
   }
 }

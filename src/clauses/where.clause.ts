@@ -1,5 +1,5 @@
 import { StringBuilder } from '../BaseBuilder';
-import { ParametersBag } from '../ParametersBag';
+import { ParametersBag } from '../parameters/ParametersBag';
 import {
   PatternBuilder,
   PatternStringBuilder,
@@ -30,20 +30,13 @@ class Comp implements StringBuilder {
   }
 }
 
-class Raw implements StringBuilder {
-  constructor(private raw: string) {}
-  build() {
-    return this.raw;
-  }
-}
-
 class WhereItem implements StringBuilder {
   constructor(
     private prefix: 'AND' | 'OR' | 'XOR',
     private clause: StringBuilder,
-    private not: boolean = false,
-    private shouldAddPrefix: boolean = false,
-    private shouldAddParenthesis: boolean = false,
+    private not: boolean,
+    private shouldAddPrefix: boolean,
+    private shouldAddParenthesis: boolean,
   ) {}
 
   build() {
@@ -65,7 +58,7 @@ export class WhereClause {
     this.prefix = prefix;
   }
 
-  private _and(builder: StringBuilder, not?: boolean): this {
+  private _and(builder: StringBuilder, not: boolean): this {
     this.clauses.push(
       new WhereItem(
         'AND',

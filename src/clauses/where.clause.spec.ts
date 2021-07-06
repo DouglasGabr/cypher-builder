@@ -12,24 +12,47 @@ describe('WhereClause', () => {
     clause.and('prop1', '<>', 'asdf');
     expect(clause.build()).toBe('WHERE prop1 <> $param1');
   });
-  it('should create where with nested and', () => {
-    const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
-    clause
-      .and('prop1', 'asdf')
-      .andWhere((w) => w.and('prop2', '>', 1).and('prop3', '<', 10));
-    expect(clause.build()).toBe(
-      'WHERE prop1 = $param1 AND (prop2 > $param2 AND prop3 < $param3)',
-    );
+  describe('nested where', () => {
+    it('should create where with nested and', () => {
+      const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
+      clause
+        .and('prop1', 'asdf')
+        .andWhere((w) => w.and('prop2', '>', 1).and('prop3', '<', 10));
+      expect(clause.build()).toBe(
+        'WHERE prop1 = $param1 AND (prop2 > $param2 AND prop3 < $param3)',
+      );
+    });
+    it('should create where with nested NOT and', () => {
+      const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
+      clause
+        .and('prop1', 'asdf')
+        .andNotWhere((w) => w.and('prop2', '>', 1).and('prop3', '<', 10));
+      expect(clause.build()).toBe(
+        'WHERE prop1 = $param1 AND NOT (prop2 > $param2 AND prop3 < $param3)',
+      );
+    });
   });
-  it('should create simple pattern filter', () => {
-    const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
-    clause.andPattern((b) =>
-      b
-        .node('user')
-        .relationship(RelationshipDirection.Out, 'PURCHASES')
-        .node('item'),
-    );
-    expect(clause.build()).toBe('WHERE (user)-[:PURCHASES]->(item)');
+  describe('pattern filters', () => {
+    it('should create pattern filter', () => {
+      const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
+      clause.andPattern((b) =>
+        b
+          .node('user')
+          .relationship(RelationshipDirection.Out, 'PURCHASES')
+          .node('item'),
+      );
+      expect(clause.build()).toBe('WHERE (user)-[:PURCHASES]->(item)');
+    });
+    it('should create NOT pattern filter', () => {
+      const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
+      clause.andNotPattern((b) =>
+        b
+          .node('user')
+          .relationship(RelationshipDirection.Out, 'PURCHASES')
+          .node('item'),
+      );
+      expect(clause.build()).toBe('WHERE NOT (user)-[:PURCHASES]->(item)');
+    });
   });
   it('should create complex filter', () => {
     const whereBuilder = new WhereClauseStringBuilder(undefined, 'WHERE');
