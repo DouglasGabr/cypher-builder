@@ -16,16 +16,14 @@ export class Node implements StringBuilder {
   }
 
   build(): string {
-    let nodeString = `(${this.alias}`;
-    if (this.labels.length > 0) {
-      nodeString += `:${this.labels.join(':')}`;
-    }
+    const labelsString =
+      this.labels.length > 0 ? `:${this.labels.join(':')}` : '';
+    let propertiesString = '';
     if (this.properties) {
-      nodeString += ` { ${Object.entries(this.properties)
+      propertiesString = `{ ${Object.entries(this.properties)
         .map(([label, value]) => `${label}: ${value}`)
         .join(', ')} }`;
     }
-    nodeString += ')';
-    return nodeString;
+    return `(${this.alias}${labelsString}${propertiesString})`;
   }
 }

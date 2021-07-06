@@ -5,6 +5,19 @@ import {
   PatternStringBuilder,
 } from '../patterns/PatternBuilder';
 
+type Comparisons =
+  | '='
+  | '=~'
+  | '>'
+  | '>='
+  | '<'
+  | '<='
+  | '<>'
+  | 'IN'
+  | 'STARTS WITH'
+  | 'ENDS WITH'
+  | 'CONTAINS';
+
 class Comp implements StringBuilder {
   constructor(
     private comp: string,
@@ -26,7 +39,7 @@ class Raw implements StringBuilder {
 
 class WhereItem implements StringBuilder {
   constructor(
-    private prefix: 'AND' | 'OR',
+    private prefix: 'AND' | 'OR' | 'XOR',
     private clause: StringBuilder,
     private not: boolean = false,
     private shouldAddPrefix: boolean = false,
@@ -44,10 +57,12 @@ class WhereItem implements StringBuilder {
 }
 
 export class WhereClause {
+  protected prefix: 'WHERE' | '';
   protected parametersBag: ParametersBag;
   protected clauses: StringBuilder[] = [];
-  constructor(parametersBag?: ParametersBag) {
+  constructor(parametersBag?: ParametersBag, prefix: 'WHERE' | '' = '') {
     this.parametersBag = parametersBag ?? new ParametersBag();
+    this.prefix = prefix;
   }
 
   private _and(builder: StringBuilder, not?: boolean): this {
@@ -95,10 +110,10 @@ export class WhereClause {
   }
 
   and(field: string, value: any): this;
-  and(field: string, comparator: string, value: any): this;
+  and(field: string, comparator: Comparisons, value: any): this;
   and(field: string, comparator: any, value?: any): this {
     let _value: any;
-    let _comparator: string;
+    let _comparator: Comparisons;
     if (typeof value === 'undefined') {
       _comparator = '=';
       _value = comparator;
@@ -106,7 +121,11 @@ export class WhereClause {
       _comparator = comparator;
       _value = value;
     }
-    const comp = new Comp(_comparator, field, this.parametersBag.add(_value));
+    const comp = new Comp(
+      _comparator,
+      field,
+      this.parametersBag.add(_value, true),
+    );
     return this._and(comp, false);
   }
 }
@@ -120,6 +139,9 @@ export class WhereClauseStringBuilder
   }
 
   build(): string {
-    throw new Error('Method not implemented.');
+    const prefixString = this.prefix ? `${this.prefix} ` : '';
+    return `${prefixString}${this.clauses
+      .map((clause) => clause.build())
+      .join(' ')}`;
   }
 }
