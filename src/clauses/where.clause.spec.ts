@@ -12,6 +12,11 @@ describe('WhereClause', () => {
     clause.and('prop1', '<>', 'asdf');
     expect(clause.build()).toBe('WHERE prop1 <> $param1');
   });
+  it('should create where with null operator', () => {
+    const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
+    clause.and('prop1', 'IS NULL').and('prop2', 'IS NOT NULL');
+    expect(clause.build()).toBe('WHERE prop1 IS NULL AND prop2 IS NOT NULL');
+  });
   describe('nested where', () => {
     it('should create where with nested and', () => {
       const clause = new WhereClauseStringBuilder(undefined, 'WHERE');

@@ -18,4 +18,12 @@ export class ParametersBag {
       return with$ ? `$${param}` : param;
     }
   }
+
+  toParametersObject(): Record<string, unknown> {
+    const parameters: Record<string, unknown> = {};
+    for (const [value, paramName] of this.parametersMap) {
+      parameters[paramName] = value;
+    }
+    return parameters;
+  }
 }
