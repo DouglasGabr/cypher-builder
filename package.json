@@ -1,11 +1,12 @@
 {
-  "name": "cypher-builder",
+  "name": "@douglasgabr/cypher-builder",
   "version": "1.0.0",
   "description": "Fluent CQL builder for Neo4j",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
