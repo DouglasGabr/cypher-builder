@@ -22,11 +22,12 @@ import { Builder, RelationshipDirection } from '@douglasgabr/cypher-builder';
 const queryBuilder = new Builder()
   .match((match) =>
     match
-      .node('alice', 'Person', { name: 'Alice' })
+      .node('person', 'Person', { name: 'Alice' })
       .relationship(RelationshipDirection.Either, 'KNOWS')
       .node('friend', 'Person'),
   )
-  .where((where) => where.and('friend.age', '>=', 18));
+  .where((where) => where.and('friend.age', '>=', 18))
+  .return('person', 'friend');
 const { query, parameters } = queryBuilder.buildQueryObject();
 ```
 
@@ -35,6 +36,7 @@ query:
 ```
 MATCH (alice:Person{ name: $param1 })-[:KNOWS]-(friend:Person)
 WHERE friend.age >= $param2
+RETURN person, friend
 ```
 
 parameters:

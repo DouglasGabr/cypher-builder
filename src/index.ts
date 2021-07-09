@@ -1,4 +1,4 @@
-import { StringBuilder } from './BaseBuilder';
+import { StringBuilder } from './types/string-builder';
 import { MatchClause, MatchClauseStringBuilder } from './clauses/match.clause';
 import { MergeClause, MergeClauseStringBuilder } from './clauses/merge.clause';
 import { ResultClauseStringBuilder } from './clauses/result-clauses/result.clause';
@@ -7,7 +7,7 @@ import { WithClauseStringBuilder } from './clauses/result-clauses/with.clause';
 import { UnionClauseStringBuilder } from './clauses/union.clause';
 import { WhereClause, WhereClauseStringBuilder } from './clauses/where.clause';
 import { ParametersBag } from './parameters/ParametersBag';
-export * from './CypherBuilderTypes';
+export * from './types/labels-and-properties';
 
 type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
 
@@ -49,9 +49,19 @@ export class Builder {
     this.addResultClause(args, withClause);
     return this;
   }
+  withDistinct(...args: Array<string | [string, string]>): this {
+    const withClause = new WithClauseStringBuilder(true);
+    this.addResultClause(args, withClause);
+    return this;
+  }
 
   return(...args: Array<string | [string, string]>): this {
     const returnClause = new ReturnClauseStringBuilder();
+    this.addResultClause(args, returnClause);
+    return this;
+  }
+  returnDistinct(...args: Array<string | [string, string]>): this {
+    const returnClause = new ReturnClauseStringBuilder(true);
     this.addResultClause(args, returnClause);
     return this;
   }

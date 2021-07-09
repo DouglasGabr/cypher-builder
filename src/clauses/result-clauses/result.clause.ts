@@ -1,4 +1,4 @@
-import { StringBuilder } from '../../BaseBuilder';
+import { StringBuilder } from '../../types/string-builder';
 
 type ResultClausePrefix = 'RETURN' | 'WITH';
 
@@ -13,7 +13,10 @@ class ResultItem implements StringBuilder {
 
 export abstract class ResultClause {
   protected items: StringBuilder[] = [];
-  constructor(protected prefix: ResultClausePrefix) {}
+  constructor(
+    protected prefix: ResultClausePrefix,
+    protected distinct?: boolean,
+  ) {}
 
   add(value: string | StringBuilder, alias?: string): this {
     this.items.push(new ResultItem(value, alias));
@@ -26,7 +29,8 @@ export abstract class ResultClauseStringBuilder
   implements StringBuilder
 {
   build(): string {
-    return `${this.prefix} ${this.items
+    const distinctString = this.distinct ? 'DISTINCT ' : '';
+    return `${this.prefix} ${distinctString}${this.items
       .map((item) => item.build())
       .join(', ')}`;
   }

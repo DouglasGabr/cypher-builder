@@ -1,4 +1,4 @@
-import { StringBuilder } from '../BaseBuilder';
+import { StringBuilder } from '../types/string-builder';
 
 export class Node implements StringBuilder {
   private alias: string;

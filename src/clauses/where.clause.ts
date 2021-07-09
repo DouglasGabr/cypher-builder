@@ -1,4 +1,4 @@
-import { StringBuilder } from '../BaseBuilder';
+import { StringBuilder } from '../types/string-builder';
 import { ParametersBag } from '../parameters/ParametersBag';
 import {
   PatternBuilder,

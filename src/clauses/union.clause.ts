@@ -1,4 +1,4 @@
-import { StringBuilder } from '../BaseBuilder';
+import { StringBuilder } from '../types/string-builder';
 
 export class UnionClause {
   constructor(protected all?: boolean) {}

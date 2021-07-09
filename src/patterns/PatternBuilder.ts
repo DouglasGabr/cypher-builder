@@ -1,10 +1,10 @@
-import { StringBuilder } from '../BaseBuilder';
+import { StringBuilder } from '../types/string-builder';
 import { Node } from './Node';
 import { ParametersBag } from '../parameters/ParametersBag';
 import {
   CypherBuilderLabelsAndTypes,
   CypherBuilderProperties,
-} from '../CypherBuilderTypes';
+} from '../types/labels-and-properties';
 import {
   Relationship,
   RelationshipDirection,
