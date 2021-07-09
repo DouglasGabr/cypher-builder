@@ -1,4 +1,6 @@
 src/
-.prettierrc.yml
+coverage/
+.eslint*
+.prettier*
 jest.config.js
 tsconfig.json
