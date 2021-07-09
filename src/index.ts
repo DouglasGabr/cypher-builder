@@ -1,12 +1,15 @@
 import { StringBuilder } from './BaseBuilder';
 import { MatchClause, MatchClauseStringBuilder } from './clauses/match.clause';
 import { MergeClause, MergeClauseStringBuilder } from './clauses/merge.clause';
+import { ResultClauseStringBuilder } from './clauses/result-clauses/result.clause';
+import { ReturnClauseStringBuilder } from './clauses/result-clauses/return.clause';
+import { WithClauseStringBuilder } from './clauses/result-clauses/with.clause';
 import { UnionClauseStringBuilder } from './clauses/union.clause';
 import { WhereClause, WhereClauseStringBuilder } from './clauses/where.clause';
 import { ParametersBag } from './parameters/ParametersBag';
 export * from './CypherBuilderTypes';
 
-type QueryRunner<T> = (query: string, parameters?: any) => Promise<T>;
+type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
 
 export {
   RelationshipDirection,
@@ -17,21 +20,21 @@ export class Builder {
   private parametersBag = new ParametersBag();
   private clauses: StringBuilder[] = [];
 
-  match(builder: (patternBuilder: MatchClause) => any) {
+  match(builder: (patternBuilder: MatchClause) => unknown) {
     const patternBuilder = new MatchClauseStringBuilder(this.parametersBag);
     builder(patternBuilder);
     this.clauses.push(patternBuilder);
     return this;
   }
 
-  merge(builder: (patternBuilder: MergeClause) => any) {
+  merge(builder: (patternBuilder: MergeClause) => unknown) {
     const patternBuilder = new MergeClauseStringBuilder(this.parametersBag);
     builder(patternBuilder);
     this.clauses.push(patternBuilder);
     return this;
   }
 
-  where(builder: (whereBuilder: WhereClause) => any) {
+  where(builder: (whereBuilder: WhereClause) => unknown) {
     const whereBuilder = new WhereClauseStringBuilder(
       this.parametersBag,
       'WHERE',
@@ -39,6 +42,29 @@ export class Builder {
     builder(whereBuilder);
     this.clauses.push(whereBuilder);
     return this;
+  }
+
+  with(...args: Array<string | [string, string]>): this {
+    const withClause = new WithClauseStringBuilder();
+    this.addResultClause(args, withClause);
+    return this;
+  }
+
+  return(...args: Array<string | [string, string]>): this {
+    const returnClause = new ReturnClauseStringBuilder();
+    this.addResultClause(args, returnClause);
+    return this;
+  }
+
+  private addResultClause(
+    args: Array<string | [string, string]>,
+    clause: ResultClauseStringBuilder,
+  ) {
+    args.forEach((arg) => {
+      const [value, alias] = typeof arg === 'string' ? [arg, undefined] : arg;
+      clause.add(value, alias);
+    });
+    this.clauses.push(clause);
   }
 
   union() {

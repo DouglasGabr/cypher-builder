@@ -1,5 +1,4 @@
 import { StringBuilder } from '../BaseBuilder';
-import { ParametersBag } from '../parameters/ParametersBag';
 import {
   PatternBuilder,
   PatternStringBuilder,

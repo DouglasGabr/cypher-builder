@@ -34,17 +34,17 @@ class Comparator implements StringBuilder {
 }
 
 class NullComparator implements StringBuilder {
-  constructor(private nullComparator: NullComparator, private field: string) {}
+  constructor(private nullComparator: NullComparisons, private field: string) {}
 
   build() {
     return `${this.field} ${this.nullComparator}`;
   }
 }
 
-class WhereItem implements StringBuilder {
+class WherePredicate implements StringBuilder {
   constructor(
     private prefix: 'AND' | 'OR' | 'XOR',
-    private clause: StringBuilder,
+    private predicate: StringBuilder,
     private not: boolean,
     private shouldAddPrefix: boolean,
     private shouldAddParenthesis: boolean,
@@ -56,14 +56,14 @@ class WhereItem implements StringBuilder {
       : (['', ''] as const);
     const prefixString = this.shouldAddPrefix ? `${this.prefix} ` : '';
     const notString = this.not ? 'NOT ' : '';
-    return `${prefixString}${notString}${leftP}${this.clause.build()}${rightP}`;
+    return `${prefixString}${notString}${leftP}${this.predicate.build()}${rightP}`;
   }
 }
 
 export class WhereClause {
   protected prefix: 'WHERE' | '';
   protected parametersBag: ParametersBag;
-  protected filters: StringBuilder[] = [];
+  protected predicates: StringBuilder[] = [];
   constructor(parametersBag?: ParametersBag, prefix: 'WHERE' | '' = '') {
     this.parametersBag = parametersBag ?? new ParametersBag();
     this.prefix = prefix;
@@ -74,12 +74,12 @@ export class WhereClause {
     builder: StringBuilder,
     not: boolean,
   ) {
-    this.filters.push(
-      new WhereItem(
+    this.predicates.push(
+      new WherePredicate(
         prefix,
         builder,
         not,
-        this.filters.length > 0,
+        this.predicates.length > 0,
         builder instanceof WhereClauseStringBuilder &&
           builder.numberOfClauses > 1,
       ),
@@ -87,29 +87,32 @@ export class WhereClause {
     return this;
   }
 
-  andNotWhere(builder: (whereBuilder: WhereClause) => any): this {
+  andNotWhere(builder: (whereBuilder: WhereClause) => unknown): this {
     return this._andWhere(builder, true);
   }
-  andWhere(builder: (whereBuilder: WhereClause) => any): this {
+  andWhere(builder: (whereBuilder: WhereClause) => unknown): this {
     return this._andWhere(builder, false);
   }
 
-  private _andWhere(builder: (whereBuilder: WhereClause) => any, not: boolean) {
+  private _andWhere(
+    builder: (whereBuilder: WhereClause) => unknown,
+    not: boolean,
+  ) {
     const whereBuilder = new WhereClauseStringBuilder(this.parametersBag);
     builder(whereBuilder);
     return this._addFilter('AND', whereBuilder, not);
   }
 
-  andNotPattern(builder: (patternBuilder: PatternBuilder) => any): this {
+  andNotPattern(builder: (patternBuilder: PatternBuilder) => unknown): this {
     return this._addPattern('AND', builder, true);
   }
-  andPattern(builder: (patternBuilder: PatternBuilder) => any): this {
+  andPattern(builder: (patternBuilder: PatternBuilder) => unknown): this {
     return this._addPattern('AND', builder, false);
   }
 
   private _addPattern(
     prefix: 'AND' | 'OR' | 'XOR',
-    builder: (patternBuilder: PatternBuilder) => any,
+    builder: (patternBuilder: PatternBuilder) => unknown,
     not: boolean,
   ) {
     const patternBuilder = new PatternStringBuilder(this.parametersBag);
@@ -117,21 +120,21 @@ export class WhereClause {
     return this._addFilter(prefix, patternBuilder, not);
   }
 
-  andNot(field: string, value: any): this;
-  andNot(field: string, isNull: 'IS NULL'): this;
-  andNot(field: string, comparator: Comparisons, value: any): this;
-  andNot(field: string, comparator: any, value?: any): this {
-    if (comparator === 'IS NULL') {
+  andNot(field: string, value: unknown): this;
+  andNot(field: string, nullComparison: NullComparisons): this;
+  andNot(field: string, comparator: Comparisons, value: unknown): this;
+  andNot(field: string, comparator: unknown, value?: unknown): this {
+    if (isNullComparator(comparator)) {
       const comp = new NullComparator(comparator, field);
       return this._addFilter('AND', comp, true);
     }
-    let _value: any;
+    let _value: unknown;
     let _comparator: Comparisons;
     if (typeof value === 'undefined') {
       _comparator = '=';
       _value = comparator;
     } else {
-      _comparator = comparator;
+      _comparator = comparator as Comparisons;
       _value = value;
     }
     const comp = new Comparator(
@@ -142,21 +145,21 @@ export class WhereClause {
     return this._addFilter('AND', comp, true);
   }
 
-  and(field: string, value: any): this;
+  and(field: string, value: unknown): this;
   and(field: string, nullComparison: NullComparisons): this;
-  and(field: string, comparator: Comparisons, value: any): this;
-  and(field: string, comparator: any, value?: any): this {
-    if (nullComparisons.includes(comparator)) {
+  and(field: string, comparator: Comparisons, value: unknown): this;
+  and(field: string, comparator: unknown, value?: unknown): this {
+    if (isNullComparator(comparator)) {
       const comp = new NullComparator(comparator, field);
       return this._addFilter('AND', comp, false);
     }
-    let _value: any;
+    let _value: unknown;
     let _comparator: Comparisons;
     if (typeof value === 'undefined') {
       _comparator = '=';
       _value = comparator;
     } else {
-      _comparator = comparator;
+      _comparator = comparator as Comparisons;
       _value = value;
     }
     const comp = new Comparator(
@@ -173,13 +176,16 @@ export class WhereClauseStringBuilder
   implements StringBuilder
 {
   get numberOfClauses() {
-    return this.filters.length;
+    return this.predicates.length;
   }
 
   build(): string {
     const prefixString = this.prefix ? `${this.prefix} ` : '';
-    return `${prefixString}${this.filters
+    return `${prefixString}${this.predicates
       .map((filter) => filter.build())
       .join(' ')}`;
   }
+}
+function isNullComparator(comparator: unknown): comparator is NullComparisons {
+  return nullComparisons.includes(comparator as NullComparisons);
 }
