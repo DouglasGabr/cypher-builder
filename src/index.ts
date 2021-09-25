@@ -7,6 +7,8 @@ import { WithClauseStringBuilder } from './clauses/result-clauses/with.clause';
 import { UnionClauseStringBuilder } from './clauses/union.clause';
 import { WhereClause, WhereClauseStringBuilder } from './clauses/where.clause';
 import { ParametersBag } from './parameters/ParametersBag';
+import { SkipClauseStringBuilder } from './clauses/pagination-clauses/skip.clause';
+import { LimitClauseStringBuilder } from './clauses/pagination-clauses/limit.clause';
 export * from './types/labels-and-properties';
 
 type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
@@ -84,6 +86,16 @@ export class Builder {
 
   unionAll() {
     this.clauses.push(new UnionClauseStringBuilder(true));
+    return this;
+  }
+
+  skip(skip: number) {
+    this.clauses.push(new SkipClauseStringBuilder(this.parametersBag, skip));
+    return this;
+  }
+
+  limit(limit: number) {
+    this.clauses.push(new LimitClauseStringBuilder(this.parametersBag, limit));
     return this;
   }
 
