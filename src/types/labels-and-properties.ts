@@ -1,9 +1,7 @@
-export interface CypherBuilderLabelsAndTypes {
-  [key: string]: string;
-  // nodes: string;
-  // relationships: string;
+export interface CypherBuilderNodes {
+  [key: string]: Record<string, unknown>;
 }
 
-export interface CypherBuilderProperties {
+export interface CypherBuilderRelationships {
   [key: string]: Record<string, unknown>;
 }

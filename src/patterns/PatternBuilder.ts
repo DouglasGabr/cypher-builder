@@ -2,8 +2,8 @@ import { StringBuilder } from '../types/string-builder';
 import { Node } from './Node';
 import { ParametersBag } from '../parameters/ParametersBag';
 import {
-  CypherBuilderLabelsAndTypes,
-  CypherBuilderProperties,
+  CypherBuilderNodes,
+  CypherBuilderRelationships,
 } from '../types/labels-and-properties';
 import {
   Relationship,
@@ -19,8 +19,8 @@ export class PatternBuilder {
   }
 
   node<
-    T extends CypherBuilderLabelsAndTypes['nodes'],
-    P extends CypherBuilderProperties[T],
+    T extends keyof CypherBuilderNodes & string,
+    P extends CypherBuilderNodes[T],
   >(alias?: string, labels?: T | T[], properties?: Partial<P>): this {
     const _labels = Array.isArray(labels)
       ? labels
@@ -42,8 +42,8 @@ export class PatternBuilder {
   }
 
   relationship<
-    T extends CypherBuilderLabelsAndTypes['relationships'],
-    P extends CypherBuilderProperties[T],
+    T extends keyof CypherBuilderRelationships & string,
+    P extends CypherBuilderRelationships[T],
   >(
     direction?: RelationshipDirection,
     types?: T | T[],
