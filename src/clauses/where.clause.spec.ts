@@ -14,8 +14,8 @@ describe('WhereClause', () => {
   });
   it('should create where with null operator', () => {
     const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
-    clause.and('prop1', 'IS NULL').and('prop2', 'IS NOT NULL');
-    expect(clause.build()).toBe('WHERE prop1 IS NULL AND prop2 IS NOT NULL');
+    clause.and('prop1', 'IS NULL');
+    expect(clause.build()).toBe('WHERE prop1 IS NULL');
   });
   describe('nested where', () => {
     it('should create where with nested and', () => {
@@ -82,6 +82,16 @@ describe('WhereClause', () => {
       .and('prop1', '1');
     expect(whereBuilder.build()).toBe(
       'WHERE prop1 = $param1 AND (prop2 <= $param2 AND ((person)-[:IS_FRIEND]-(personB) AND person.name =~ $param3) AND prop4 <> $param4) AND personB.name CONTAINS $param5 AND prop1 = $param1',
+    );
+  });
+  describe('literals', () => {
+    const whereBuilder = new WhereClauseStringBuilder(undefined, 'WHERE');
+
+    whereBuilder
+      .andLiteral('field.name', 'other.name')
+      .andNotLiteral('field.lastName', 'CONTAINS', 'other.lastName');
+    expect(whereBuilder.build()).toBe(
+      'WHERE field.name = other.name AND NOT field.lastName CONTAINS other.lastName',
     );
   });
 });
