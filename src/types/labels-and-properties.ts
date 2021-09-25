@@ -1,7 +1,4 @@
-export interface CypherBuilderNodes {
-  [key: string]: Record<string, unknown>;
-}
+/* eslint-disable @typescript-eslint/no-empty-interface */
+export interface CypherBuilderNodes {}
 
-export interface CypherBuilderRelationships {
-  [key: string]: Record<string, unknown>;
-}
+export interface CypherBuilderRelationships {}
