@@ -17,10 +17,11 @@ export * from './types/labels-and-properties';
 
 type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
 
-export {
-  RelationshipDirection,
-  RelationshipLimits,
-} from './patterns/Relationship';
+export { RelationshipDirection } from './patterns/Relationship';
+
+export type { RelationshipLimits } from './patterns/Relationship';
+
+export type { PatternBuilder } from './patterns/PatternBuilder';
 
 export class Builder {
   private parametersBag = new ParametersBag();
