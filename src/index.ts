@@ -9,6 +9,10 @@ import { WhereClause, WhereClauseStringBuilder } from './clauses/where.clause';
 import { ParametersBag } from './parameters/ParametersBag';
 import { SkipClauseStringBuilder } from './clauses/pagination-clauses/skip.clause';
 import { LimitClauseStringBuilder } from './clauses/pagination-clauses/limit.clause';
+import {
+  OptionalMatchClause,
+  OptionalMatchClauseStringBuilder,
+} from './clauses/optional-match.clause';
 export * from './types/labels-and-properties';
 
 type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
@@ -24,6 +28,15 @@ export class Builder {
 
   match(builder: (patternBuilder: MatchClause) => unknown) {
     const patternBuilder = new MatchClauseStringBuilder(this.parametersBag);
+    builder(patternBuilder);
+    this.clauses.push(patternBuilder);
+    return this;
+  }
+
+  optionalMatch(builder: (patternBuilder: OptionalMatchClause) => unknown) {
+    const patternBuilder = new OptionalMatchClauseStringBuilder(
+      this.parametersBag,
+    );
     builder(patternBuilder);
     this.clauses.push(patternBuilder);
     return this;
