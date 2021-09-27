@@ -1,6 +1,13 @@
 import { RelationshipDirection } from '../patterns/Relationship';
 import { WhereClauseStringBuilder } from './where.clause';
 
+declare module '../types/labels-and-properties' {
+  export interface CypherBuilderRelationships {
+    PURCHASES: {};
+    IS_FRIEND: {};
+  }
+}
+
 describe('WhereClause', () => {
   it('should create simple where', () => {
     const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
