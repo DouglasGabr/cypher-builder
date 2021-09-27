@@ -9,15 +9,65 @@ declare module '../types/labels-and-properties' {
 }
 
 describe('WhereClause', () => {
+  describe('regular predicates', () => {
+    it('should build or', () => {
+      const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
+      clause.or('name', 'Bob').or('name', 'Alice');
+      expect(clause.build()).toBe('WHERE name = $name OR name = $name_2');
+    });
+    it('should build or not', () => {
+      const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
+      clause.or('name', 'Bob').orNot('name', 'Alice');
+      expect(clause.build()).toBe('WHERE name = $name OR NOT name = $name_2');
+    });
+  });
+  describe('where predicates', () => {
+    it('should create or where', () => {
+      const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
+      clause
+        .or('test', 'test')
+        .orWhere((w) => w.or('name', 'Bob').orNot('name', 'Alice'));
+      expect(clause.build()).toBe(
+        'WHERE test = $test OR (name = $name OR NOT name = $name_2)',
+      );
+    });
+    it('should create or not where', () => {
+      const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
+      clause
+        .or('test', 'test')
+        .orNotWhere((w) => w.or('name', 'Bob').orNot('name', 'Alice'));
+      expect(clause.build()).toBe(
+        'WHERE test = $test OR NOT (name = $name OR NOT name = $name_2)',
+      );
+    });
+    it('should create xor where', () => {
+      const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
+      clause
+        .or('test', 'test')
+        .xorWhere((w) => w.or('name', 'Bob').orNot('name', 'Alice'));
+      expect(clause.build()).toBe(
+        'WHERE test = $test XOR (name = $name OR NOT name = $name_2)',
+      );
+    });
+    it('should create xor not where', () => {
+      const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
+      clause
+        .or('test', 'test')
+        .xorNotWhere((w) => w.or('name', 'Bob').orNot('name', 'Alice'));
+      expect(clause.build()).toBe(
+        'WHERE test = $test XOR NOT (name = $name OR NOT name = $name_2)',
+      );
+    });
+  });
   it('should create simple where', () => {
     const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
     clause.and('prop1', 'asdf');
-    expect(clause.build()).toBe('WHERE prop1 = $param1');
+    expect(clause.build()).toBe('WHERE prop1 = $prop1');
   });
   it('should create where with custom operator', () => {
     const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
     clause.and('prop1', '<>', 'asdf');
-    expect(clause.build()).toBe('WHERE prop1 <> $param1');
+    expect(clause.build()).toBe('WHERE prop1 <> $prop1');
   });
   it('should create where with null operator', () => {
     const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
@@ -31,7 +81,7 @@ describe('WhereClause', () => {
         .and('prop1', 'asdf')
         .andWhere((w) => w.and('prop2', '>', 1).and('prop3', '<', 10));
       expect(clause.build()).toBe(
-        'WHERE prop1 = $param1 AND (prop2 > $param2 AND prop3 < $param3)',
+        'WHERE prop1 = $prop1 AND (prop2 > $prop2 AND prop3 < $prop3)',
       );
     });
     it('should create where with nested NOT and', () => {
@@ -40,11 +90,11 @@ describe('WhereClause', () => {
         .and('prop1', 'asdf')
         .andNotWhere((w) => w.and('prop2', '>', 1).and('prop3', '<', 10));
       expect(clause.build()).toBe(
-        'WHERE prop1 = $param1 AND NOT (prop2 > $param2 AND prop3 < $param3)',
+        'WHERE prop1 = $prop1 AND NOT (prop2 > $prop2 AND prop3 < $prop3)',
       );
     });
   });
-  describe('pattern filters', () => {
+  describe('pattern predicates', () => {
     it('should create pattern filter', () => {
       const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
       clause.andPattern((b) =>
@@ -88,17 +138,19 @@ describe('WhereClause', () => {
       .and('personB.name', 'CONTAINS', '5')
       .and('prop1', '1');
     expect(whereBuilder.build()).toBe(
-      'WHERE prop1 = $param1 AND (prop2 <= $param2 AND ((person)-[:IS_FRIEND]-(personB) AND person.name =~ $param3) AND prop4 <> $param4) AND personB.name CONTAINS $param5 AND prop1 = $param1',
+      'WHERE prop1 = $prop1 AND (prop2 <= $prop2 AND ((person)-[:IS_FRIEND]-(personB) AND person.name =~ $person_name) AND prop4 <> $prop4) AND personB.name CONTAINS $personB_name AND prop1 = $prop1_2',
     );
   });
   describe('literals', () => {
-    const whereBuilder = new WhereClauseStringBuilder(undefined, 'WHERE');
+    it('should build literal where', () => {
+      const whereBuilder = new WhereClauseStringBuilder(undefined, 'WHERE');
 
-    whereBuilder
-      .andLiteral('field.name', 'other.name')
-      .andNotLiteral('field.lastName', 'CONTAINS', 'other.lastName');
-    expect(whereBuilder.build()).toBe(
-      'WHERE field.name = other.name AND NOT field.lastName CONTAINS other.lastName',
-    );
+      whereBuilder
+        .andLiteral('field.name', 'other.name')
+        .andNotLiteral('field.lastName', 'CONTAINS', 'other.lastName');
+      expect(whereBuilder.build()).toBe(
+        'WHERE field.name = other.name AND NOT field.lastName CONTAINS other.lastName',
+      );
+    });
   });
 });

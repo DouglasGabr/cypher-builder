@@ -166,7 +166,7 @@ export class WhereClause {
     const comp = new Comparator(
       _comparator,
       field,
-      this.parametersBag.add(_value, true),
+      this.parametersBag.add(_value, true, field),
     );
     return this.#addPredicate(prefix, comp, not);
   }

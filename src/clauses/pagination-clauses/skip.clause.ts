@@ -6,7 +6,7 @@ export class SkipClause extends BaseClause {
   protected skipParam: string;
   constructor(protected parametersBag: ParametersBag, skip: number) {
     super('SKIP', parametersBag);
-    this.skipParam = parametersBag.add(skip, true);
+    this.skipParam = parametersBag.add(skip, true, 'skip');
   }
 }
 

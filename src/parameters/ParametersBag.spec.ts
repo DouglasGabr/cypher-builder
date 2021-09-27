@@ -5,29 +5,43 @@ describe('ParametersBag', () => {
     it('should add new parameter', () => {
       const parametersBag = new ParametersBag();
       const param = parametersBag.add(123);
-      expect(param).toBe('param1');
+      expect(param).toBe('param');
     });
     it('should add new parameter and return it with $', () => {
       const parametersBag = new ParametersBag();
       const param = parametersBag.add(123, true);
-      expect(param).toBe('$param1');
+      expect(param).toBe('$param');
+    });
+    it('should add new parameter with alias', () => {
+      const parametersBag = new ParametersBag();
+      const param = parametersBag.add(123, false, 'userId');
+      expect(param).toBe('userId');
+    });
+    it('should add new parameter with alias with $', () => {
+      const parametersBag = new ParametersBag();
+      const param = parametersBag.add(123, true, 'userId');
+      expect(param).toBe('$userId');
+    });
+    it('should add new parameter with incremental number if alias already exists', () => {
+      const parametersBag = new ParametersBag();
+      parametersBag.add(123, true, 'userId');
+      const param = parametersBag.add(456, true, 'userId');
+      expect(param).toBe('$userId_2');
+    });
+    it('should replace all non valid chars with _', () => {
+      const parametersBag = new ParametersBag();
+      const param = parametersBag.add(456, true, 'user.id');
+      expect(param).toBe('$user_id');
     });
   });
-  describe('get', () => {
-    it('should return param key if it exists', () => {
-      const parametersBag = new ParametersBag(new Map([[123, 'param1']]));
-      const param = parametersBag.get(123);
-      expect(param).toBe('param1');
-    });
-    it('should return param key with $ if it exists', () => {
-      const parametersBag = new ParametersBag(new Map([[123, 'param1']]));
-      const param = parametersBag.get(123, true);
-      expect(param).toBe('$param1');
-    });
-    it('should return undefined if it does not exists', () => {
-      const parametersBag = new ParametersBag();
-      const param = parametersBag.get(123);
-      expect(param).toBeUndefined();
+
+  describe('toParametersObject', () => {
+    it('should return parameter object', () => {
+      const parametersBag = new ParametersBag(new Map([['test', 123]]));
+      const obj = parametersBag.toParametersObject();
+      expect(obj).toStrictEqual({
+        test: 123,
+      });
     });
   });
 });

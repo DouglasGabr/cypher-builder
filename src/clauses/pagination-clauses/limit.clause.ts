@@ -6,7 +6,7 @@ export class LimitClause extends BaseClause {
   protected limitParam: string;
   constructor(protected parametersBag: ParametersBag, limit: number) {
     super('LIMIT', parametersBag);
-    this.limitParam = parametersBag.add(limit, true);
+    this.limitParam = parametersBag.add(limit, true, 'limit');
   }
 }
 

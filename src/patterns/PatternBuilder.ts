@@ -32,7 +32,11 @@ export class PatternBuilder {
       _properties = Object.entries(properties).reduce(
         (newProperties, [label, value]) => ({
           ...newProperties,
-          [label]: this.parametersBag.add(value, true),
+          [label]: this.parametersBag.add(
+            value,
+            true,
+            alias ? `${alias}_${label}` : undefined,
+          ),
         }),
         {} as Record<string, string>,
       );

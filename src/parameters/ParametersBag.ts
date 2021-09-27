@@ -1,28 +1,28 @@
 export class ParametersBag {
-  private parametersMap: Map<unknown, string>;
-  constructor(initialMap?: Map<unknown, string>) {
-    this.parametersMap = initialMap ?? new Map<unknown, string>();
+  private parametersMap: Map<string, unknown>;
+  constructor(initialMap?: Map<string, unknown>) {
+    this.parametersMap = initialMap ?? new Map();
   }
 
-  add(value?: unknown, with$ = false): string {
-    if (!this.parametersMap.has(value)) {
-      const param = `param${this.parametersMap.size + 1}`;
-      this.parametersMap.set(value, param);
+  add(value?: unknown, with$ = false, alias?: string): string {
+    let paramCount = 1;
+    const _alias = alias?.replace(/\W/g, '_') ?? 'param';
+    let key = _alias;
+    while (this.parametersMap.has(key)) {
+      key = `${_alias}_${++paramCount}`;
     }
-    return this.get(value, with$)!;
+    this.parametersMap.set(key, value);
+    return this.formatKey(key, with$);
   }
 
-  get(value?: unknown, with$ = false): string | undefined {
-    const param = this.parametersMap.get(value);
-    if (param) {
-      return with$ ? `$${param}` : param;
-    }
+  formatKey(key: string, with$ = false) {
+    return with$ ? `$${key}` : key;
   }
 
   toParametersObject(): Record<string, unknown> {
     const parameters: Record<string, unknown> = {};
-    for (const [value, paramName] of this.parametersMap) {
-      parameters[paramName] = value;
+    for (const [key, value] of this.parametersMap) {
+      parameters[key] = value;
     }
     return parameters;
   }
