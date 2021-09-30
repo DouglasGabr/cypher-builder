@@ -13,6 +13,7 @@ import {
   OptionalMatchClause,
   OptionalMatchClauseStringBuilder,
 } from './clauses/optional-match.clause';
+import { UnwindClauseStringBuilder } from './clauses/unwind.clause';
 export * from './types/labels-and-properties';
 
 type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
@@ -110,6 +111,13 @@ export class Builder {
 
   limit(limit: number) {
     this.clauses.push(new LimitClauseStringBuilder(this.parametersBag, limit));
+    return this;
+  }
+
+  unwind(list: Array<unknown> | string, as: string): this {
+    this.clauses.push(
+      new UnwindClauseStringBuilder(list, as, this.parametersBag),
+    );
     return this;
   }
 
