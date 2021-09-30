@@ -14,6 +14,18 @@ import {
   OptionalMatchClauseStringBuilder,
 } from './clauses/optional-match.clause';
 import { UnwindClauseStringBuilder } from './clauses/unwind.clause';
+import {
+  SetClause,
+  SetClauseStringBuilder,
+} from './clauses/set-clauses/set.clause';
+import {
+  OnMatchClause,
+  OnMatchClauseStringBuilder,
+} from './clauses/set-clauses/on-match.clause';
+import {
+  OnCreateClause,
+  OnCreateClauseStringBuilder,
+} from './clauses/set-clauses/on-create.clause';
 export * from './types/labels-and-properties';
 
 type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
@@ -24,18 +36,20 @@ export type { RelationshipLimits } from './patterns/Relationship';
 
 export type { PatternBuilder } from './patterns/PatternBuilder';
 
+type BuilderParameter<T> = (builder: T) => unknown;
+
 export class Builder {
   private parametersBag = new ParametersBag();
   private clauses: StringBuilder[] = [];
 
-  match(builder: (patternBuilder: MatchClause) => unknown) {
+  match(builder: BuilderParameter<MatchClause>) {
     const patternBuilder = new MatchClauseStringBuilder(this.parametersBag);
     builder(patternBuilder);
     this.clauses.push(patternBuilder);
     return this;
   }
 
-  optionalMatch(builder: (patternBuilder: OptionalMatchClause) => unknown) {
+  optionalMatch(builder: BuilderParameter<OptionalMatchClause>) {
     const patternBuilder = new OptionalMatchClauseStringBuilder(
       this.parametersBag,
     );
@@ -44,14 +58,14 @@ export class Builder {
     return this;
   }
 
-  merge(builder: (patternBuilder: MergeClause) => unknown) {
+  merge(builder: BuilderParameter<MergeClause>) {
     const patternBuilder = new MergeClauseStringBuilder(this.parametersBag);
     builder(patternBuilder);
     this.clauses.push(patternBuilder);
     return this;
   }
 
-  where(builder: (whereBuilder: WhereClause) => unknown) {
+  where(builder: BuilderParameter<WhereClause>) {
     const whereBuilder = new WhereClauseStringBuilder(
       this.parametersBag,
       'WHERE',
@@ -118,6 +132,26 @@ export class Builder {
     this.clauses.push(
       new UnwindClauseStringBuilder(list, as, this.parametersBag),
     );
+    return this;
+  }
+
+  set(builder: BuilderParameter<SetClause>): this {
+    const clause = new SetClauseStringBuilder(this.parametersBag);
+    builder(clause);
+    this.clauses.push(clause);
+    return this;
+  }
+
+  onMatchSet(builder: BuilderParameter<OnMatchClause>): this {
+    const clause = new OnMatchClauseStringBuilder(this.parametersBag);
+    builder(clause);
+    this.clauses.push(clause);
+    return this;
+  }
+  onCreateSet(builder: BuilderParameter<OnCreateClause>): this {
+    const clause = new OnCreateClauseStringBuilder(this.parametersBag);
+    builder(clause);
+    this.clauses.push(clause);
     return this;
   }
 
