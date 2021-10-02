@@ -3,8 +3,8 @@ import { WhereClauseStringBuilder } from './where.clause';
 
 declare module '../types/labels-and-properties' {
   export interface CypherBuilderRelationships {
-    PURCHASES: {};
-    IS_FRIEND: {};
+    PURCHASES: Record<string, never>;
+    IS_FRIEND: Record<string, never>;
   }
 }
 

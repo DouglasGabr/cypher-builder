@@ -141,7 +141,6 @@ export class Builder {
     this.clauses.push(clause);
     return this;
   }
-
   onMatchSet(builder: BuilderParameter<OnMatchClause>): this {
     const clause = new OnMatchClauseStringBuilder(this.parametersBag);
     builder(clause);

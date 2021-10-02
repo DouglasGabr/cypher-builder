@@ -28,7 +28,7 @@ class LabelSetUpdate implements ISetUpdate {
   }
 }
 
-export class SetClause {
+export abstract class SetClause {
   protected updates: ISetUpdate[] = [];
 
   constructor(private parametersBag = new ParametersBag()) {}

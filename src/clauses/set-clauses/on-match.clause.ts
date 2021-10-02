@@ -1,7 +1,7 @@
 import { StringBuilder } from '../../types/string-builder';
 import { SetClause, SetClauseStringBuilder } from './set.clause';
 
-export class OnMatchClause extends SetClause {}
+export abstract class OnMatchClause extends SetClause {}
 
 export class OnMatchClauseStringBuilder
   extends SetClauseStringBuilder
