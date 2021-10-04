@@ -2,6 +2,10 @@
 
 Fluent CQL Builder for Neo4j
 
+## 🚨🚨🚨 Warning 🚨🚨🚨
+
+**This package is in early stages of development, use it at your own risk.**
+
 ## Installation
 
 ```bash
