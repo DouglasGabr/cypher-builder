@@ -1,0 +1,45 @@
+name: Node.js Package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        node: ['12', '14', '16']
+    name: Install Dependencies & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Archive dist
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist
+  publish-npm:
+    name: Publish to NPM
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12
+          registry-url: https://registry.npmjs.org/
+      - name: Download dist
+        uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: dist
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
