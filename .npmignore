@@ -1,6 +1,9 @@
+.github/
 src/
 coverage/
 .eslint*
 .prettier*
 jest.config.js
 tsconfig.json
+tsconfig.build.json
+types.d.ts
