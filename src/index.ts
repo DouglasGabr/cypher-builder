@@ -135,6 +135,7 @@ export class Builder {
   /**
    * @param list array to be provided as a parameter
    * @param as new variable for each item
+   * @see [UNWIND](https://neo4j.com/docs/cypher-manual/current/clauses/unwind/)
    * @example
    * .unwind([1, 2, 3], 'item')
    * // UNWIND $item AS item
@@ -144,6 +145,7 @@ export class Builder {
   /**
    * @param list reference to a list that was already declared in the query
    * @param as new variable for each item
+   * @see [UNWIND](https://neo4j.com/docs/cypher-manual/current/clauses/unwind/)
    * @example
    * .unwind('array', 'item')
    * // UNWIND array AS item
