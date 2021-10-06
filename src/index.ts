@@ -26,6 +26,10 @@ import {
   OnCreateClause,
   OnCreateClauseStringBuilder,
 } from './clauses/set-clauses/on-create.clause';
+import {
+  OrderByClauseStringBuilder,
+  OrderItem,
+} from './clauses/order-by.clause';
 export * from './types/labels-and-properties';
 
 type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
@@ -128,6 +132,23 @@ export class Builder {
     return this;
   }
 
+  /**
+   * @param list array to be provided as a parameter
+   * @param as new variable for each item
+   * @example
+   * .unwind([1, 2, 3], 'item')
+   * // UNWIND $item AS item
+   * // $item => [1, 2, 3]
+   */
+  unwind(list: Array<unknown>, as: string): this;
+  /**
+   * @param list reference to a list that was already declared in the query
+   * @param as new variable for each item
+   * @example
+   * .unwind('array', 'item')
+   * // UNWIND array AS item
+   */
+  unwind(list: string, as: string): this;
   unwind(list: Array<unknown> | string, as: string): this {
     this.clauses.push(
       new UnwindClauseStringBuilder(list, as, this.parametersBag),
@@ -150,6 +171,12 @@ export class Builder {
   onCreateSet(builder: BuilderParameter<OnCreateClause>): this {
     const clause = new OnCreateClauseStringBuilder(this.parametersBag);
     builder(clause);
+    this.clauses.push(clause);
+    return this;
+  }
+
+  orderBy(...items: OrderItem[]): this {
+    const clause = new OrderByClauseStringBuilder(items);
     this.clauses.push(clause);
     return this;
   }

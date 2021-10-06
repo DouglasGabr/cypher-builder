@@ -11,12 +11,137 @@ import {
   RelationshipLimits,
 } from './Relationship';
 
+/**
+ * @see [Patterns](https://neo4j.com/docs/cypher-manual/current/syntax/patterns/)
+ */
 export class PatternBuilder {
   protected parametersBag: ParametersBag;
   protected patterns: StringBuilder[] = [];
   constructor(parametersBag?: ParametersBag) {
     this.parametersBag = parametersBag ?? new ParametersBag();
   }
+
+  /**
+   * @example
+   * .node()
+   * // ()
+   */
+  node(): this;
+
+  /**
+   * @example
+   * .node('user')
+   * // (user)
+   */
+  node(alias: string): this;
+
+  /**
+   * @example
+   * .node('user', 'User')
+   * // (user:User)
+   */
+  node<Label extends keyof CypherBuilderNodes & string>(
+    alias: string,
+    label: Label,
+  ): this;
+
+  /**
+   * @example
+   * .node('user', ['User', 'Admin'])
+   * // (user:User:Admin)
+   */
+  node<Label extends keyof CypherBuilderNodes & string>(
+    alias: string,
+    labels: Label[],
+  ): this;
+
+  /**
+   * @example
+   * .node('user', 'User', { name: 'Admin' })
+   * // (user:User{ name: $user_name })
+   * // $user_name => 'Admin'
+   */
+  node<
+    Label extends keyof CypherBuilderNodes & string,
+    Properties extends CypherBuilderNodes[Label],
+  >(alias: string, label: Label, properties: Partial<Properties>): this;
+
+  /**
+   * @example
+   * .node('user', ['User', 'Admin'], { name: 'Admin' })
+   * // (user:User:Admin{ name: $user_name })
+   * // $user_name => 'Admin'
+   */
+  node<
+    Label extends keyof CypherBuilderNodes & string,
+    Properties extends CypherBuilderNodes[Label],
+  >(alias: string, labels: Label[], properties: Partial<Properties>): this;
+
+  /**
+   * @example
+   * .node('user', undefined, { name: 'Admin' })
+   * // (user{ name: $user_name })
+   * // $user_name => 'Admin'
+   */
+  node(
+    alias: string,
+    label: undefined,
+    properties: Record<string, unknown>,
+  ): this;
+
+  /**
+   * @example
+   * .node(undefined, 'User')
+   * // (:User)
+   */
+  node<Label extends keyof CypherBuilderNodes & string>(
+    alias: undefined,
+    label: Label,
+  ): this;
+
+  /**
+   * @example
+   * .node(undefined, ['User', 'Admin'])
+   * // (:User:Admin)
+   */
+  node<Label extends keyof CypherBuilderNodes & string>(
+    alias: undefined,
+    labels: Label[],
+  ): this;
+
+  /**
+   * @example
+   * .node(undefined, 'User', { name: 'Admin' })
+   * // (:User{ name: $name })
+   * // $name => 'Admin'
+   */
+  node<
+    Label extends keyof CypherBuilderNodes & string,
+    Properties extends CypherBuilderNodes[Label],
+  >(alias: undefined, label: Label, properties: Partial<Properties>): this;
+
+  /**
+   * @example
+   * .node(undefined, ['User', 'Admin'], { name: 'Admin' })
+   * // (:User:Admin{ name: $name })
+   * // $name => 'Admin'
+   */
+  node<
+    Label extends keyof CypherBuilderNodes & string,
+    Properties extends CypherBuilderNodes[Label],
+  >(alias: undefined, labels: Label[], properties: Partial<Properties>): this;
+
+  /**
+   * @example
+   * .node(undefined, undefined, { name: 'Admin' })
+   * // ({ name: $name })
+   * // $name => 'Admin'
+   */
+  node(
+    alias: undefined,
+    label: undefined,
+    properties: Record<string, unknown>,
+  ): this;
 
   node<
     T extends keyof CypherBuilderNodes & string,
@@ -35,7 +160,7 @@ export class PatternBuilder {
           [label]: this.parametersBag.add(
             value,
             true,
-            alias ? `${alias}_${label}` : undefined,
+            alias ? `${alias}_${label}` : label,
           ),
         }),
         {} as Record<string, string>,

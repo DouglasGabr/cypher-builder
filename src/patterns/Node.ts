@@ -1,5 +1,8 @@
 import { StringBuilder } from '../types/string-builder';
 
+/**
+ * @see [Patterns for nodes](https://neo4j.com/docs/cypher-manual/current/syntax/patterns/#cypher-pattern-node)
+ */
 export class Node implements StringBuilder {
   private alias: string;
   private labels: string[];

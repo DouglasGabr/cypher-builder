@@ -13,6 +13,9 @@ export type RelationshipLimits =
   | [start: null | undefined, end: number]
   | '*';
 
+/**
+ * @see [Patterns for relationships](https://neo4j.com/docs/cypher-manual/current/syntax/patterns/#cypher-pattern-relationship)
+ */
 export class Relationship implements StringBuilder {
   private direction: RelationshipDirection;
   private alias: string;

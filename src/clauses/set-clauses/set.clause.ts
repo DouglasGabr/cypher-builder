@@ -33,6 +33,15 @@ export abstract class SetClause {
 
   constructor(private parametersBag = new ParametersBag()) {}
 
+  /**
+   * @example
+   * .set('user.name', 'New Name')
+   * // user.name = $user_name
+   * // $user_name => 'New Name'
+   * .set('user', { name: 'New Name' }, '+=')
+   * // user += $user
+   * // $user => { name: 'New Name' }
+   */
   set(
     updated: string,
     value: unknown,
@@ -48,6 +57,13 @@ export abstract class SetClause {
     return this;
   }
 
+  /**
+   * @example
+   * .setLiteral('user.lastName', 'parent.lastName')
+   * // user.lastName = parent.lastName
+   * .setLiteral('clone', 'user', '+=')
+   * // clone += user
+   */
   setLiteral(
     updated: string,
     value: string,
@@ -56,6 +72,26 @@ export abstract class SetClause {
     this.updates.push(new FieldSetUpdate(updated, value, operator));
     return this;
   }
+
+  /**
+   * @example
+   * .setLabels('user', 'Admin')
+   * // user:Admin
+   */
+  setLabels<Label extends keyof CypherBuilderNodes & string>(
+    node: string,
+    label: Label,
+  ): this;
+
+  /**
+   * @example
+   * .setLabels('user', ['Admin', 'Adult'])
+   * // user:Admin:Adult
+   */
+  setLabels<Label extends keyof CypherBuilderNodes & string>(
+    node: string,
+    labels: Label[],
+  ): this;
 
   setLabels<T extends keyof CypherBuilderNodes & string>(
     node: string,

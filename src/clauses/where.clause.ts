@@ -62,6 +62,9 @@ class WherePredicate implements StringBuilder {
 
 type PredicatePrefix = 'AND' | 'OR' | 'XOR';
 
+/**
+ * @see [WHERE](https://neo4j.com/docs/cypher-manual/current/clauses/where/)
+ */
 export class WhereClause {
   protected prefix: 'WHERE' | '';
   protected parametersBag: ParametersBag;
