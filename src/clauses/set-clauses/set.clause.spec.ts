@@ -2,8 +2,8 @@ import { SetClauseStringBuilder } from './set.clause';
 
 declare module '../../types/labels-and-properties' {
   export interface CypherBuilderNodes {
-    User: Record<string, never>;
-    Post: Record<string, never>;
+    User: { id: string };
+    Post: { id: string };
   }
 }
 

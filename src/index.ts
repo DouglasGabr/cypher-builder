@@ -28,18 +28,19 @@ import {
 } from './clauses/set-clauses/on-create.clause';
 import {
   OrderByClauseStringBuilder,
-  OrderItem,
+  OrderByItem,
 } from './clauses/order-by.clause';
 import { DeleteClauseStringBuilder } from './clauses/delete.clause';
 export * from './types/labels-and-properties';
 
 type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
 
-export { RelationshipDirection } from './patterns/Relationship';
-
-export type { RelationshipLimits } from './patterns/Relationship';
-
+export type {
+  RelationshipLimits,
+  RelationshipDirection,
+} from './patterns/Relationship';
 export type { PatternBuilder } from './patterns/PatternBuilder';
+export type { OrderByDirection, OrderByItem } from './clauses/order-by.clause';
 
 type BuilderParameter<T> = (builder: T) => unknown;
 
@@ -47,6 +48,22 @@ export class Builder {
   private parametersBag = new ParametersBag();
   private clauses: StringBuilder[] = [];
 
+  /**
+   * @param builder pattern builder
+   * @see [MATCH](https://neo4j.com/docs/cypher-manual/current/clauses/match/)
+   * @example
+   * .match(m => {
+   *   m.node('person', 'Person')
+   * })
+   * // MATCH (person:Person)
+   * @example
+   * .match(m => {
+   *   m.node('a')
+   *     .relationship('out', 'KNOWS')
+   *     .node('b')
+   * })
+   * // MATCH (a)-[:KNOWS]->(b)
+   */
   match(builder: BuilderParameter<MatchClause>) {
     const patternBuilder = new MatchClauseStringBuilder(this.parametersBag);
     builder(patternBuilder);
@@ -54,6 +71,22 @@ export class Builder {
     return this;
   }
 
+  /**
+   * @param builder pattern builder
+   * @see [OPTIONAL MATCH](https://neo4j.com/docs/cypher-manual/current/clauses/optional-match/)
+   * @example
+   * .optionalMatch(m => {
+   *   m.node('person', 'Person')
+   * })
+   * // OPTIONAL MATCH (person:Person)
+   * @example
+   * .optionalMatch(m => {
+   *   m.node('a')
+   *     .relationship('out', 'KNOWS')
+   *     .node('b')
+   * })
+   * // OPTIONAL MATCH (a)-[:KNOWS]->(b)
+   */
   optionalMatch(builder: BuilderParameter<OptionalMatchClause>) {
     const patternBuilder = new OptionalMatchClauseStringBuilder(
       this.parametersBag,
@@ -178,7 +211,17 @@ export class Builder {
     return this;
   }
 
-  orderBy(...items: OrderItem[]): this {
+  /**
+   * @param items items to order by
+   * @see [ORDER BY](https://neo4j.com/docs/cypher-manual/current/clauses/order-by/)
+   * @example
+   * .orderBy('person.name')
+   * // ORDER BY person.name
+   * @example
+   * .orderBy(['person.name', 'DESC'], 'person.createdAt')
+   * // ORDER BY person.name DESC, person.createdAt
+   */
+  orderBy(...items: OrderByItem[]): this {
     const clause = new OrderByClauseStringBuilder(items);
     this.clauses.push(clause);
     return this;

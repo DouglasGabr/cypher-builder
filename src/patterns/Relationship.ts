@@ -1,10 +1,6 @@
 import { StringBuilder } from '../types/string-builder';
 
-export enum RelationshipDirection {
-  In = '<-',
-  Out = '->',
-  Either = '--',
-}
+export type RelationshipDirection = 'in' | 'out' | 'either';
 
 export type RelationshipLimits =
   | number
@@ -30,7 +26,7 @@ export class Relationship implements StringBuilder {
     properties?: Record<string, string>,
     limits?: RelationshipLimits,
   ) {
-    this.direction = direction ?? RelationshipDirection.Either;
+    this.direction = direction ?? 'either';
     this.alias = alias ?? '';
     this.types = types ?? [];
     this.properties = properties;
@@ -39,7 +35,7 @@ export class Relationship implements StringBuilder {
 
   build(): string {
     let relationshipString = '';
-    if (this.direction === RelationshipDirection.In) {
+    if (this.direction === 'in') {
       relationshipString += '<';
     }
     relationshipString += `-[${this.alias}`;
@@ -71,7 +67,7 @@ export class Relationship implements StringBuilder {
     }
 
     relationshipString += ']-';
-    if (this.direction === RelationshipDirection.Out) {
+    if (this.direction === 'out') {
       relationshipString += '>';
     }
     return relationshipString;

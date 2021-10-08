@@ -1,4 +1,3 @@
-import { RelationshipDirection } from '../patterns/Relationship';
 import { WhereClauseStringBuilder } from './where.clause';
 
 declare module '../types/labels-and-properties' {
@@ -98,20 +97,14 @@ describe('WhereClause', () => {
     it('should create pattern filter', () => {
       const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
       clause.andPattern((b) =>
-        b
-          .node('user')
-          .relationship(RelationshipDirection.Out, 'PURCHASES')
-          .node('item'),
+        b.node('user').relationship('out', 'PURCHASES').node('item'),
       );
       expect(clause.build()).toBe('WHERE (user)-[:PURCHASES]->(item)');
     });
     it('should create NOT pattern filter', () => {
       const clause = new WhereClauseStringBuilder(undefined, 'WHERE');
       clause.andNotPattern((b) =>
-        b
-          .node('user')
-          .relationship(RelationshipDirection.Out, 'PURCHASES')
-          .node('item'),
+        b.node('user').relationship('out', 'PURCHASES').node('item'),
       );
       expect(clause.build()).toBe('WHERE NOT (user)-[:PURCHASES]->(item)');
     });
@@ -128,7 +121,7 @@ describe('WhereClause', () => {
               .andPattern((pattern) =>
                 pattern
                   .node('person')
-                  .relationship(RelationshipDirection.Either, 'IS_FRIEND')
+                  .relationship('either', 'IS_FRIEND')
                   .node('personB'),
               )
               .and('person.name', '=~', '3'),

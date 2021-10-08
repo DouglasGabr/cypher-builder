@@ -1,11 +1,11 @@
 import { StringBuilder } from '../types/string-builder';
 
-export type OrderDirection = 'ASC' | 'DESC' | 'asc' | 'desc';
+export type OrderByDirection = 'ASC' | 'DESC' | 'asc' | 'desc';
 
-export type OrderItem = string | [field: string, direction: OrderDirection];
+export type OrderByItem = string | [field: string, direction: OrderByDirection];
 
 export abstract class OrderByClause {
-  constructor(protected items: OrderItem[]) {}
+  constructor(protected items: OrderByItem[]) {}
 }
 
 export class OrderByClauseStringBuilder
