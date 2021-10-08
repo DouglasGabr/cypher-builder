@@ -1,6 +1,6 @@
 {
   "name": "@douglasgabr/cypher-builder",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Fluent CQL builder for Neo4j",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
