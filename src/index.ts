@@ -30,6 +30,7 @@ import {
   OrderByClauseStringBuilder,
   OrderItem,
 } from './clauses/order-by.clause';
+import { DeleteClauseStringBuilder } from './clauses/delete.clause';
 export * from './types/labels-and-properties';
 
 type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
@@ -180,6 +181,29 @@ export class Builder {
   orderBy(...items: OrderItem[]): this {
     const clause = new OrderByClauseStringBuilder(items);
     this.clauses.push(clause);
+    return this;
+  }
+
+  /**
+   * @param items items to delete
+   * @see [DELETE](https://neo4j.com/docs/cypher-manual/current/clauses/delete/)
+   * @example
+   * .delete('node1')
+   * // DELETE node1
+   */
+  delete(...items: string[]): this {
+    this.clauses.push(new DeleteClauseStringBuilder(false, items));
+    return this;
+  }
+  /**
+   * @param items items to detach and delete
+   * @see [Delete a node with all its relationships](https://neo4j.com/docs/cypher-manual/current/clauses/delete/#delete-delete-a-node-with-all-its-relationships)
+   * @example
+   * .detachDelete('node1')
+   * // DETACH DELETE node1
+   */
+  detachDelete(...items: string[]): this {
+    this.clauses.push(new DeleteClauseStringBuilder(true, items));
     return this;
   }
 
