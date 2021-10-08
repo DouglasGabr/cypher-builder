@@ -1,3 +1,8 @@
+# 2.0.0 / 2021-10-07
+
+- 💥 BREAKING CHANGE: `RelationshipDirection` is now just a string union, so previous usages as an enum must be updated
+- chore: rename some `order by` types and export them in the index file
+
 # 1.2.0 / 2021-10-07
 
 - feat: add `delete` and `detachDelete` to builder
