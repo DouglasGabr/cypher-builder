@@ -1,3 +1,20 @@
+# 2.1.0 / 2021-10-09
+
+- fix(patterns): don't add brackets to empty relationship patterns (`.relationship()`)
+  - before: `-[]-`
+  - after: `--`
+- feat(clauses): add label predicates to where:
+
+  ```typescript
+  builder.where((w) => {
+    w.andLabel('user', 'User').andLabel('admin', ['User', 'Admin']);
+  });
+  ```
+
+  ```
+  WHERE user:User AND admin:User:Admin
+  ```
+
 # 2.0.0 / 2021-10-07
 
 - 💥 BREAKING CHANGE: `RelationshipDirection` is now just a string union, so previous usages as an enum must be updated
