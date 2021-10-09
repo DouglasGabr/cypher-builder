@@ -19,6 +19,18 @@ export class Relationship implements StringBuilder {
   private properties?: Record<string, string>;
   private limits?: RelationshipLimits;
 
+  #buildArrowsString(): ['<-', '-'] | ['-', '->'] | ['-', '-'] {
+    switch (this.direction) {
+      case 'in':
+        return ['<-', '-'];
+      case 'out':
+        return ['-', '->'];
+      case 'either':
+      default:
+        return ['-', '-'];
+    }
+  }
+
   constructor(
     direction?: RelationshipDirection,
     alias?: string,
@@ -33,43 +45,62 @@ export class Relationship implements StringBuilder {
     this.limits = limits;
   }
 
-  build(): string {
-    let relationshipString = '';
-    if (this.direction === 'in') {
-      relationshipString += '<';
-    }
-    relationshipString += `-[${this.alias}`;
-
-    if (this.types.length > 0) {
-      relationshipString += `:${this.types.join('|')}`;
-    }
-
+  #buildLimitsString(): string {
+    let limitsString = '';
     if (this.limits) {
-      relationshipString += '*';
+      limitsString += '*';
       if (typeof this.limits === 'number') {
-        relationshipString += this.limits.toString();
+        limitsString += this.limits.toString();
       } else if (Array.isArray(this.limits)) {
         const [start, end] = this.limits;
         if (typeof start === 'number') {
-          relationshipString += start.toString();
+          limitsString += start.toString();
         }
-        relationshipString += '..';
+        limitsString += '..';
         if (typeof end === 'number') {
-          relationshipString += end.toString();
+          limitsString += end.toString();
         }
       }
     }
+    return limitsString;
+  }
 
+  build(): string {
+    const aliasString = this.alias;
+    const typesString = this.#buildTypesString();
+    const limitsString = this.#buildLimitsString();
+    const propertiesString = this.#buildPropertiesString();
+    const [leftBracket, rightBracket] = this.#buildBracketsString(
+      aliasString,
+      typesString,
+      limitsString,
+      propertiesString,
+    );
+    const [leftArrow, rightArrow] = this.#buildArrowsString();
+    return `${leftArrow}${leftBracket}${aliasString}${typesString}${limitsString}${propertiesString}${rightBracket}${rightArrow}`;
+  }
+
+  #buildBracketsString(
+    aliasString: string,
+    typesString: string,
+    limitsString: string,
+    propertiesString: string,
+  ): ['[', ']'] | ['', ''] {
+    return aliasString || typesString || limitsString || propertiesString
+      ? ['[', ']']
+      : ['', ''];
+  }
+
+  #buildPropertiesString() {
     if (this.properties) {
-      relationshipString += ` { ${Object.entries(this.properties)
+      return ` { ${Object.entries(this.properties)
         .map(([label, value]) => `${label}: ${value}`)
         .join(', ')} }`;
     }
+    return '';
+  }
 
-    relationshipString += ']-';
-    if (this.direction === 'out') {
-      relationshipString += '>';
-    }
-    return relationshipString;
+  #buildTypesString() {
+    return this.types.length > 0 ? `:${this.types.join('|')}` : '';
   }
 }
