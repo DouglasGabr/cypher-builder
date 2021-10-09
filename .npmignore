@@ -8,3 +8,5 @@ tsconfig.json
 tsconfig.build.json
 types.d.ts
 images/
+commitlint.config.js
+.husky/
