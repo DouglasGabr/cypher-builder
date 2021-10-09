@@ -4,6 +4,7 @@ import {
   PatternBuilder,
   PatternStringBuilder,
 } from '../patterns/PatternBuilder';
+import { CypherBuilderNodes } from '..';
 
 type Comparisons =
   | '='
@@ -18,8 +19,8 @@ type Comparisons =
   | 'ENDS WITH'
   | 'CONTAINS';
 
-type NullComparison = 'IS NULL';
-const nullComparison: NullComparison = 'IS NULL';
+type NullComparison = 'IS NULL' | 'IS NOT NULL';
+const nullComparisons: NullComparison[] = ['IS NULL', 'IS NOT NULL'];
 
 class Comparator implements StringBuilder {
   constructor(
@@ -38,6 +39,14 @@ class NullComparator implements StringBuilder {
 
   build() {
     return `${this.field} ${this.nullComparator}`;
+  }
+}
+
+class LabelComparator implements StringBuilder {
+  constructor(private alias: string, private labels: string[]) {}
+
+  build() {
+    return `${this.alias}:${this.labels.join(':')}`;
   }
 }
 
@@ -285,6 +294,59 @@ export class WhereClause {
   ): this {
     return this.#addLiteral('XOR', true, field, comparator, value);
   }
+
+  #addLabel(
+    prefix: PredicatePrefix,
+    not: boolean,
+    alias: string,
+    labels: string | string[],
+  ): this {
+    this.#addPredicate(
+      prefix,
+      new LabelComparator(
+        alias,
+        typeof labels === 'string' ? [labels] : labels,
+      ),
+      not,
+    );
+    return this;
+  }
+  andLabel<Label extends keyof CypherBuilderNodes & string>(
+    alias: string,
+    labels: Label | Label[],
+  ): this {
+    return this.#addLabel('AND', false, alias, labels);
+  }
+  andNotLabel<Label extends keyof CypherBuilderNodes & string>(
+    alias: string,
+    labels: Label | Label[],
+  ): this {
+    return this.#addLabel('AND', true, alias, labels);
+  }
+  orLabel<Label extends keyof CypherBuilderNodes & string>(
+    alias: string,
+    labels: Label | Label[],
+  ): this {
+    return this.#addLabel('OR', false, alias, labels);
+  }
+  orNotLabel<Label extends keyof CypherBuilderNodes & string>(
+    alias: string,
+    labels: Label | Label[],
+  ): this {
+    return this.#addLabel('OR', true, alias, labels);
+  }
+  xorLabel<Label extends keyof CypherBuilderNodes & string>(
+    alias: string,
+    labels: Label | Label[],
+  ): this {
+    return this.#addLabel('XOR', false, alias, labels);
+  }
+  xorNotLabel<Label extends keyof CypherBuilderNodes & string>(
+    alias: string,
+    labels: Label | Label[],
+  ): this {
+    return this.#addLabel('XOR', true, alias, labels);
+  }
 }
 
 export class WhereClauseStringBuilder
@@ -303,5 +365,8 @@ export class WhereClauseStringBuilder
   }
 }
 function isNullComparator(comparator: unknown): comparator is NullComparison {
-  return nullComparison === comparator;
+  return (
+    typeof comparator === 'string' &&
+    nullComparisons.includes(comparator as NullComparison)
+  );
 }

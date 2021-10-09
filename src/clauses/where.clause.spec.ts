@@ -1,6 +1,10 @@
 import { WhereClauseStringBuilder } from './where.clause';
 
 declare module '../types/labels-and-properties' {
+  export interface CypherBuilderNodes {
+    User: { id: string };
+    Post: { id: string };
+  }
   export interface CypherBuilderRelationships {
     PURCHASES: Record<string, never>;
     IS_FRIEND: Record<string, never>;
@@ -144,6 +148,16 @@ describe('WhereClause', () => {
       expect(whereBuilder.build()).toBe(
         'WHERE field.name = other.name AND NOT field.lastName CONTAINS other.lastName',
       );
+    });
+  });
+  describe('Label predicates', () => {
+    describe('and', () => {
+      it('should build and WHERE with label predicate', () => {
+        const builder = new WhereClauseStringBuilder();
+        builder.andLabel('node', 'User').andLabel('other', ['Post', 'User']);
+        const result = builder.build();
+        expect(result).toBe('node:User AND other:Post:User');
+      });
     });
   });
 });
