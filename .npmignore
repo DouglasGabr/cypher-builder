@@ -7,3 +7,4 @@ jest.config.js
 tsconfig.json
 tsconfig.build.json
 types.d.ts
+images/

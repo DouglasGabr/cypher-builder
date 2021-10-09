@@ -20,16 +20,55 @@ yarn add @douglasgabr/cypher-builder
 
 ## Usage
 
+### Type inference (required for typescript projects)
+
+First, you must create a `*.d.ts` file in your project, in order to type the possible nodes, relationships and their properties.
+
+```typescript
+// neo4j-types.d.ts
+import '@douglasgabr/cypher-builder';
+
+declare module '@douglasgabr/cypher-builder' {
+  export interface CypherBuilderNodes {
+    User: {
+      id: string;
+    };
+  }
+
+  export interface CypherBuilderRelationships {
+    KNOWS: {
+      level: 'friendship' | 'colleague';
+    };
+  }
+}
+```
+
+That will enable your IDE (tested only in VSCode) to suggest values for your node labels, relationship types and its properties.
+
+**Node Label suggestion:**
+
+![node label suggestion](./images/node-label.png)
+
+**Node Properties suggestion:**
+
+![node properties suggestion](./images/node-properties.png)
+
+**Relationship Type suggestion:**
+
+![relationship type suggestion](./images/relationship-type.png)
+
+### Example
+
 ```typescript
 import { Builder, RelationshipDirection } from '@douglasgabr/cypher-builder';
 
 const queryBuilder = new Builder()
-  .match((match) =>
+  .match((match) => {
     match
       .node('person', 'Person', { name: 'Alice' })
-      .relationship(RelationshipDirection.Either, 'KNOWS')
+      .relationship('either', 'KNOWS')
       .node('friend', 'Person'),
-  )
+  })
   .where((where) => where.and('friend.age', '>=', 18))
   .return('person', 'friend');
 const { query, parameters } = queryBuilder.buildQueryObject();
@@ -38,8 +77,8 @@ const { query, parameters } = queryBuilder.buildQueryObject();
 query:
 
 ```
-MATCH (alice:Person{ name: $param1 })-[:KNOWS]-(friend:Person)
-WHERE friend.age >= $param2
+MATCH (person:Person{ name: $person_name })-[:KNOWS]-(friend:Person)
+WHERE friend.age >= $friend_age
 RETURN person, friend
 ```
 
@@ -47,7 +86,7 @@ parameters:
 
 ```typescript
 {
-  param1: 'Alice',
-  param2: 18
+  person_name: 'Alice',
+  friend_age: 18
 }
 ```
