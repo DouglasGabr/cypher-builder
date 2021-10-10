@@ -3,14 +3,26 @@ import {
   PatternBuilder,
   PatternStringBuilder,
 } from '../patterns/PatternBuilder';
+import { ShouldBeAdded } from '../types/should-be-added';
+import { Clause } from './base-clause';
 
-export class MatchClause extends PatternBuilder {}
+export class MatchClause extends Clause {
+  constructor(protected patternBuilder: PatternBuilder) {
+    super('MATCH');
+  }
+}
 
 export class MatchClauseStringBuilder
-  extends PatternStringBuilder
-  implements StringBuilder, MatchClause
+  extends MatchClause
+  implements StringBuilder, ShouldBeAdded
 {
+  get __shouldBeAdded() {
+    return this.patternBuilder.__shouldBeAdded;
+  }
+  constructor(protected override patternBuilder: PatternStringBuilder) {
+    super(patternBuilder);
+  }
   build() {
-    return 'MATCH ' + super.build();
+    return `${this.prefix} ${this.patternBuilder.build()}`;
   }
 }

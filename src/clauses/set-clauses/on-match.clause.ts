@@ -1,13 +1,8 @@
-import { StringBuilder } from '../../types/string-builder';
-import { SetClause, SetClauseStringBuilder } from './set.clause';
+import { ParametersBag } from '../../parameters/ParametersBag';
+import { SetClauseStringBuilder } from './set.clause';
 
-export abstract class OnMatchClause extends SetClause {}
-
-export class OnMatchClauseStringBuilder
-  extends SetClauseStringBuilder
-  implements OnMatchClause, StringBuilder
-{
-  build(): string {
-    return 'ON MATCH ' + super.build();
+export class OnMatchClauseStringBuilder extends SetClauseStringBuilder {
+  constructor(parametersBag: ParametersBag) {
+    super('ON MATCH SET', parametersBag);
   }
 }

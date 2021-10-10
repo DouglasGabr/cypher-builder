@@ -13,6 +13,6 @@ export class UsingScanClauseStringBuilder
   implements StringBuilder
 {
   constructor(variable: string, label: string) {
-    super('SCAN', new UsingScanValueBuilder(variable, label));
+    super('USING SCAN', new UsingScanValueBuilder(variable, label));
   }
 }

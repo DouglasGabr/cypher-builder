@@ -1,4 +1,6 @@
+import { ShouldBeAdded } from '../../types/should-be-added';
 import { StringBuilder } from '../../types/string-builder';
+import { Clause } from '../base-clause';
 
 type ResultClausePrefix = 'RETURN' | 'WITH';
 
@@ -11,12 +13,11 @@ class ResultItem implements StringBuilder {
   }
 }
 
-export abstract class ResultClause {
+export abstract class ResultClause extends Clause {
   protected items: StringBuilder[] = [];
-  constructor(
-    protected prefix: ResultClausePrefix,
-    protected distinct?: boolean,
-  ) {}
+  constructor(prefix: ResultClausePrefix, protected distinct?: boolean) {
+    super(prefix);
+  }
 
   add(value: string | StringBuilder, alias?: string): this {
     this.items.push(new ResultItem(value, alias));
@@ -26,8 +27,11 @@ export abstract class ResultClause {
 
 export abstract class ResultClauseStringBuilder
   extends ResultClause
-  implements StringBuilder
+  implements StringBuilder, ShouldBeAdded
 {
+  get __shouldBeAdded() {
+    return this.items.length > 0;
+  }
   build(): string {
     const distinctString = this.distinct ? 'DISTINCT ' : '';
     return `${this.prefix} ${distinctString}${this.items

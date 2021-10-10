@@ -5,6 +5,8 @@ import {
   PatternStringBuilder,
 } from '../patterns/PatternBuilder';
 import { CypherBuilderNodes } from '..';
+import { Clause } from './base-clause';
+import { ShouldBeAdded } from '../types/should-be-added';
 
 type Comparisons =
   | '='
@@ -74,13 +76,14 @@ type PredicatePrefix = 'AND' | 'OR' | 'XOR';
 /**
  * @see [WHERE](https://neo4j.com/docs/cypher-manual/current/clauses/where/)
  */
-export class WhereClause {
-  protected prefix: 'WHERE' | '';
-  protected parametersBag: ParametersBag;
+export abstract class WhereClause extends Clause {
   protected predicates: StringBuilder[] = [];
-  constructor(parametersBag?: ParametersBag, prefix: 'WHERE' | '' = '') {
-    this.parametersBag = parametersBag ?? new ParametersBag();
-    this.prefix = prefix;
+
+  constructor(
+    private parametersBag: ParametersBag,
+    protected withPrefix = true,
+  ) {
+    super('WHERE');
   }
 
   #addPredicate(prefix: PredicatePrefix, builder: StringBuilder, not: boolean) {
@@ -102,7 +105,10 @@ export class WhereClause {
     builder: (whereBuilder: WhereClause) => unknown,
     not: boolean,
   ) {
-    const whereBuilder = new WhereClauseStringBuilder(this.parametersBag);
+    const whereBuilder = new WhereClauseStringBuilder(
+      this.parametersBag,
+      false,
+    );
     builder(whereBuilder);
     return this.#addPredicate(prefix, whereBuilder, not);
   }
@@ -351,14 +357,18 @@ export class WhereClause {
 
 export class WhereClauseStringBuilder
   extends WhereClause
-  implements StringBuilder
+  implements StringBuilder, ShouldBeAdded
 {
   get numberOfClauses() {
     return this.predicates.length;
   }
 
+  get __shouldBeAdded() {
+    return this.predicates.length > 0;
+  }
+
   build(): string {
-    const prefixString = this.prefix ? `${this.prefix} ` : '';
+    const prefixString = this.withPrefix ? `${this.prefix} ` : '';
     return `${prefixString}${this.predicates
       .map((filter) => filter.build())
       .join(' ')}`;

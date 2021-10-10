@@ -10,16 +10,14 @@ import {
   RelationshipDirection,
   RelationshipLimits,
 } from './Relationship';
+import { ShouldBeAdded } from '../types/should-be-added';
 
 /**
  * @see [Patterns](https://neo4j.com/docs/cypher-manual/current/syntax/patterns/)
  */
 export class PatternBuilder {
-  protected parametersBag: ParametersBag;
   protected patterns: StringBuilder[] = [];
-  constructor(parametersBag?: ParametersBag) {
-    this.parametersBag = parametersBag ?? new ParametersBag();
-  }
+  constructor(protected parametersBag: ParametersBag) {}
 
   /**
    * @example
@@ -130,8 +128,11 @@ export class PatternBuilder {
 
 export class PatternStringBuilder
   extends PatternBuilder
-  implements StringBuilder
+  implements StringBuilder, ShouldBeAdded
 {
+  get __shouldBeAdded() {
+    return this.patterns.length > 0;
+  }
   build() {
     return this.patterns.map((p) => p.build()).join('');
   }

@@ -1,14 +1,19 @@
+import { ShouldBeAdded } from '../types/should-be-added';
 import { StringBuilder } from '../types/string-builder';
+import { Clause } from './base-clause';
 
-export class UnionClause {
-  constructor(protected all?: boolean) {}
+export class UnionClause extends Clause {
+  constructor(all?: boolean) {
+    super(all ? 'UNION ALL' : 'UNION');
+  }
 }
 
 export class UnionClauseStringBuilder
   extends UnionClause
-  implements StringBuilder
+  implements StringBuilder, ShouldBeAdded
 {
+  __shouldBeAdded = true;
   build(): string {
-    return `UNION${this.all ? ' ALL' : ''}`;
+    return this.prefix;
   }
 }

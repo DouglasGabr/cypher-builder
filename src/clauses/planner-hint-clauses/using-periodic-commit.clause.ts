@@ -6,6 +6,6 @@ export class UsingPeriodicCommitClauseStringBuilder
   implements StringBuilder
 {
   constructor(rows?: number) {
-    super('PERIODIC COMMIT', rows ? rows.toString() : '');
+    super('USING PERIODIC COMMIT', rows ? rows.toString() : '');
   }
 }

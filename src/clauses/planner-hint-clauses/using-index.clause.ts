@@ -17,6 +17,6 @@ export class UsingIndexClauseStringBuilder
   implements StringBuilder
 {
   constructor(variable: string, label: string, fields: string[]) {
-    super('INDEX', new UsingIndexValueBuilder(variable, label, fields));
+    super('USING INDEX', new UsingIndexValueBuilder(variable, label, fields));
   }
 }

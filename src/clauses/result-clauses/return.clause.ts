@@ -1,7 +1,7 @@
 import { StringBuilder } from '../../types/string-builder';
 import { ResultClause, ResultClauseStringBuilder } from './result.clause';
 
-export class ReturnClause extends ResultClause {
+export abstract class ReturnClause extends ResultClause {
   constructor(distinct?: boolean) {
     super('RETURN', distinct);
   }

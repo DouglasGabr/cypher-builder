@@ -1,3 +1,4 @@
+import { ParametersBag } from '../parameters/ParametersBag';
 import { PatternStringBuilder } from './PatternBuilder';
 
 declare module '../types/labels-and-properties' {
@@ -10,7 +11,7 @@ declare module '../types/labels-and-properties' {
 describe('PatternBuilder', () => {
   describe('nodes', () => {
     it('should build node with only properties', () => {
-      const builder = new PatternStringBuilder();
+      const builder = new PatternStringBuilder(new ParametersBag());
       builder.node(undefined, undefined, { id: 'test' });
       expect(builder.build()).toBe('({ id: $id })');
     });

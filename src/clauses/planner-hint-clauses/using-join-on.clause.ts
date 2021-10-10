@@ -6,6 +6,6 @@ export class UsingJoinOnClauseStringBuilder
   implements StringBuilder
 {
   constructor(variable: string) {
-    super('JOIN ON', variable);
+    super('USING JOIN ON', variable);
   }
 }

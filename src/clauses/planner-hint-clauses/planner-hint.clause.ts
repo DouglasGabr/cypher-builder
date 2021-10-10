@@ -1,16 +1,17 @@
 import { StringBuilder } from '../../types/string-builder';
+import { Clause } from '../base-clause';
 
-export abstract class PlannerHintClause {
+type PlannerHintPrefix =
+  | 'USING INDEX'
+  | 'USING INDEX SEEK'
+  | 'USING SCAN'
+  | 'USING JOIN ON'
+  | 'USING PERIODIC COMMIT';
+
+export abstract class PlannerHintClause extends Clause {
   protected value: string;
-  constructor(
-    protected hint:
-      | 'INDEX'
-      | 'INDEX SEEK'
-      | 'SCAN'
-      | 'JOIN ON'
-      | 'PERIODIC COMMIT',
-    value: StringBuilder | string,
-  ) {
+  constructor(prefix: PlannerHintPrefix, value: StringBuilder | string) {
+    super(prefix);
     this.value = typeof value === 'string' ? value : value.build();
   }
 }
@@ -20,6 +21,6 @@ export abstract class PlannerHintClauseStringBuilder
   implements StringBuilder
 {
   build(): string {
-    return `USING ${this.hint} ${this.value}`.trim();
+    return `${this.prefix} ${this.value}`.trim();
   }
 }

@@ -1,19 +1,21 @@
 import { ParametersBag } from '../../parameters/ParametersBag';
+import { ShouldBeAdded } from '../../types/should-be-added';
 import { StringBuilder } from '../../types/string-builder';
-import { BaseClause } from '../base-clause';
+import { Clause } from '../base-clause';
 
-export class SkipClause extends BaseClause {
+export class SkipClause extends Clause {
   protected skipParam: string;
-  constructor(protected parametersBag: ParametersBag, skip: number) {
-    super('SKIP', parametersBag);
+  constructor(parametersBag: ParametersBag, skip: number) {
+    super('SKIP');
     this.skipParam = parametersBag.add(skip, true, 'skip');
   }
 }
 
 export class SkipClauseStringBuilder
   extends SkipClause
-  implements StringBuilder
+  implements StringBuilder, ShouldBeAdded
 {
+  __shouldBeAdded = true;
   build(): string {
     return `${this.prefix} ${this.skipParam}`;
   }

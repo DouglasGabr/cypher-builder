@@ -1,5 +1,3 @@
-import { ParametersBag } from '../parameters/ParametersBag';
-
 type ClausePrefix =
   | 'MATCH'
   | 'MERGE'
@@ -7,11 +5,23 @@ type ClausePrefix =
   | 'RETURN'
   | 'SKIP'
   | 'LIMIT'
-  | 'WITH';
+  | 'WITH'
+  | 'SET'
+  | 'ON CREATE SET'
+  | 'ON MATCH SET'
+  | 'OPTIONAL MATCH'
+  | 'ORDER BY'
+  | 'DELETE'
+  | 'DETACH DELETE'
+  | 'UNION ALL'
+  | 'UNION'
+  | 'UNWIND'
+  | 'USING INDEX'
+  | 'USING INDEX SEEK'
+  | 'USING SCAN'
+  | 'USING JOIN ON'
+  | 'USING PERIODIC COMMIT';
 
-export abstract class BaseClause {
-  constructor(
-    protected prefix: ClausePrefix,
-    protected parametersBag: ParametersBag,
-  ) {}
+export abstract class Clause {
+  constructor(protected prefix: ClausePrefix) {}
 }

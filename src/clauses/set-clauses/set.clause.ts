@@ -1,6 +1,8 @@
 import { CypherBuilderNodes } from '../..';
 import { ParametersBag } from '../../parameters/ParametersBag';
+import { ShouldBeAdded } from '../../types/should-be-added';
 import { StringBuilder } from '../../types/string-builder';
+import { Clause } from '../base-clause';
 
 interface ISetUpdate extends StringBuilder {
   __type: 'ISetUpdate';
@@ -28,10 +30,14 @@ class LabelSetUpdate implements ISetUpdate {
   }
 }
 
-export abstract class SetClause {
+type SetClausePrefix = 'SET' | 'ON CREATE SET' | 'ON MATCH SET';
+
+export abstract class SetClause extends Clause {
   protected updates: ISetUpdate[] = [];
 
-  constructor(private parametersBag = new ParametersBag()) {}
+  constructor(prefix: SetClausePrefix, private parametersBag: ParametersBag) {
+    super(prefix);
+  }
 
   /**
    * @example
@@ -77,25 +83,13 @@ export abstract class SetClause {
    * @example
    * .setLabels('user', 'Admin')
    * // user:Admin
-   */
-  setLabels<Label extends keyof CypherBuilderNodes & string>(
-    node: string,
-    label: Label,
-  ): this;
-
-  /**
    * @example
    * .setLabels('user', ['Admin', 'Adult'])
    * // user:Admin:Adult
    */
   setLabels<Label extends keyof CypherBuilderNodes & string>(
     node: string,
-    labels: Label[],
-  ): this;
-
-  setLabels<T extends keyof CypherBuilderNodes & string>(
-    node: string,
-    labels: T | T[],
+    labels: Label | Label[],
   ): this {
     this.updates.push(
       new LabelSetUpdate(node, Array.isArray(labels) ? labels : [labels]),
@@ -104,8 +98,14 @@ export abstract class SetClause {
   }
 }
 
-export class SetClauseStringBuilder extends SetClause implements StringBuilder {
+export class SetClauseStringBuilder
+  extends SetClause
+  implements StringBuilder, ShouldBeAdded
+{
+  get __shouldBeAdded() {
+    return this.updates.length > 0;
+  }
   build(): string {
-    return 'SET ' + this.updates.map((u) => u.build()).join(', ');
+    return `${this.prefix} ${this.updates.map((u) => u.build()).join(', ')}`;
   }
 }

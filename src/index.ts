@@ -1,6 +1,6 @@
 import { StringBuilder } from './types/string-builder';
-import { MatchClause, MatchClauseStringBuilder } from './clauses/match.clause';
-import { MergeClause, MergeClauseStringBuilder } from './clauses/merge.clause';
+import { MatchClauseStringBuilder } from './clauses/match.clause';
+import { MergeClauseStringBuilder } from './clauses/merge.clause';
 import { ResultClauseStringBuilder } from './clauses/result-clauses/result.clause';
 import { ReturnClauseStringBuilder } from './clauses/result-clauses/return.clause';
 import { WithClauseStringBuilder } from './clauses/result-clauses/with.clause';
@@ -9,28 +9,24 @@ import { WhereClause, WhereClauseStringBuilder } from './clauses/where.clause';
 import { ParametersBag } from './parameters/ParametersBag';
 import { SkipClauseStringBuilder } from './clauses/pagination-clauses/skip.clause';
 import { LimitClauseStringBuilder } from './clauses/pagination-clauses/limit.clause';
-import {
-  OptionalMatchClause,
-  OptionalMatchClauseStringBuilder,
-} from './clauses/optional-match.clause';
+import { OptionalMatchClauseStringBuilder } from './clauses/optional-match.clause';
 import { UnwindClauseStringBuilder } from './clauses/unwind.clause';
 import {
   SetClause,
   SetClauseStringBuilder,
 } from './clauses/set-clauses/set.clause';
-import {
-  OnMatchClause,
-  OnMatchClauseStringBuilder,
-} from './clauses/set-clauses/on-match.clause';
-import {
-  OnCreateClause,
-  OnCreateClauseStringBuilder,
-} from './clauses/set-clauses/on-create.clause';
+import { OnMatchClauseStringBuilder } from './clauses/set-clauses/on-match.clause';
+import { OnCreateClauseStringBuilder } from './clauses/set-clauses/on-create.clause';
 import {
   OrderByClauseStringBuilder,
   OrderByItem,
 } from './clauses/order-by.clause';
 import { DeleteClauseStringBuilder } from './clauses/delete.clause';
+import {
+  PatternBuilder,
+  PatternStringBuilder,
+} from './patterns/PatternBuilder';
+import { ShouldBeAdded } from './types/should-be-added';
 export * from './types/labels-and-properties';
 
 type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
@@ -64,10 +60,11 @@ export class Builder {
    * })
    * // MATCH (a)-[:KNOWS]->(b)
    */
-  match(builder: BuilderParameter<MatchClause>) {
-    const patternBuilder = new MatchClauseStringBuilder(this.parametersBag);
+  match(builder: BuilderParameter<PatternBuilder>) {
+    const patternBuilder = new PatternStringBuilder(this.parametersBag);
     builder(patternBuilder);
-    this.clauses.push(patternBuilder);
+    const matchClause = new MatchClauseStringBuilder(patternBuilder);
+    this.#addClause(matchClause);
     return this;
   }
 
@@ -87,51 +84,50 @@ export class Builder {
    * })
    * // OPTIONAL MATCH (a)-[:KNOWS]->(b)
    */
-  optionalMatch(builder: BuilderParameter<OptionalMatchClause>) {
-    const patternBuilder = new OptionalMatchClauseStringBuilder(
-      this.parametersBag,
-    );
+  optionalMatch(builder: BuilderParameter<PatternBuilder>) {
+    const patternBuilder = new PatternStringBuilder(this.parametersBag);
     builder(patternBuilder);
-    this.clauses.push(patternBuilder);
+    const optionalMatchClause = new OptionalMatchClauseStringBuilder(
+      patternBuilder,
+    );
+    this.#addClause(optionalMatchClause);
     return this;
   }
 
-  merge(builder: BuilderParameter<MergeClause>) {
-    const patternBuilder = new MergeClauseStringBuilder(this.parametersBag);
+  merge(builder: BuilderParameter<PatternBuilder>) {
+    const patternBuilder = new PatternStringBuilder(this.parametersBag);
     builder(patternBuilder);
-    this.clauses.push(patternBuilder);
+    const mergeClause = new MergeClauseStringBuilder(patternBuilder);
+    this.#addClause(mergeClause);
     return this;
   }
 
   where(builder: BuilderParameter<WhereClause>) {
-    const whereBuilder = new WhereClauseStringBuilder(
-      this.parametersBag,
-      'WHERE',
-    );
+    const whereBuilder = new WhereClauseStringBuilder(this.parametersBag);
     builder(whereBuilder);
-    this.clauses.push(whereBuilder);
+    this.#addClause(whereBuilder);
     return this;
   }
 
-  with(...args: Array<string | [string, string]>): this {
+  with(...items: Array<string | [string, string]>): this {
     const withClause = new WithClauseStringBuilder();
-    this.addResultClause(args, withClause);
+    this.addResultClause(items, withClause);
     return this;
   }
-  withDistinct(...args: Array<string | [string, string]>): this {
+  withDistinct(...items: Array<string | [string, string]>): this {
     const withClause = new WithClauseStringBuilder(true);
-    this.addResultClause(args, withClause);
+    this.addResultClause(items, withClause);
     return this;
   }
 
-  return(...args: Array<string | [string, string]>): this {
+  return(...items: Array<string | [string, string]>): this {
     const returnClause = new ReturnClauseStringBuilder();
-    this.addResultClause(args, returnClause);
+    this.addResultClause(items, returnClause);
     return this;
   }
-  returnDistinct(...args: Array<string | [string, string]>): this {
+  returnDistinct(...items: Array<string | [string, string]>): this {
     const returnClause = new ReturnClauseStringBuilder(true);
-    this.addResultClause(args, returnClause);
+    this.addResultClause(items, returnClause);
     return this;
   }
 
@@ -143,26 +139,26 @@ export class Builder {
       const [value, alias] = typeof arg === 'string' ? [arg, undefined] : arg;
       clause.add(value, alias);
     });
-    this.clauses.push(clause);
+    this.#addClause(clause);
   }
 
   union() {
-    this.clauses.push(new UnionClauseStringBuilder());
+    this.#addClause(new UnionClauseStringBuilder());
     return this;
   }
 
   unionAll() {
-    this.clauses.push(new UnionClauseStringBuilder(true));
+    this.#addClause(new UnionClauseStringBuilder(true));
     return this;
   }
 
   skip(skip: number) {
-    this.clauses.push(new SkipClauseStringBuilder(this.parametersBag, skip));
+    this.#addClause(new SkipClauseStringBuilder(this.parametersBag, skip));
     return this;
   }
 
   limit(limit: number) {
-    this.clauses.push(new LimitClauseStringBuilder(this.parametersBag, limit));
+    this.#addClause(new LimitClauseStringBuilder(this.parametersBag, limit));
     return this;
   }
 
@@ -186,28 +182,28 @@ export class Builder {
    */
   unwind(list: string, as: string): this;
   unwind(list: Array<unknown> | string, as: string): this {
-    this.clauses.push(
+    this.#addClause(
       new UnwindClauseStringBuilder(list, as, this.parametersBag),
     );
     return this;
   }
 
   set(builder: BuilderParameter<SetClause>): this {
-    const clause = new SetClauseStringBuilder(this.parametersBag);
+    const clause = new SetClauseStringBuilder('SET', this.parametersBag);
     builder(clause);
-    this.clauses.push(clause);
+    this.#addClause(clause);
     return this;
   }
-  onMatchSet(builder: BuilderParameter<OnMatchClause>): this {
+  onMatchSet(builder: BuilderParameter<SetClause>): this {
     const clause = new OnMatchClauseStringBuilder(this.parametersBag);
     builder(clause);
-    this.clauses.push(clause);
+    this.#addClause(clause);
     return this;
   }
-  onCreateSet(builder: BuilderParameter<OnCreateClause>): this {
+  onCreateSet(builder: BuilderParameter<SetClause>): this {
     const clause = new OnCreateClauseStringBuilder(this.parametersBag);
     builder(clause);
-    this.clauses.push(clause);
+    this.#addClause(clause);
     return this;
   }
 
@@ -223,7 +219,7 @@ export class Builder {
    */
   orderBy(...items: OrderByItem[]): this {
     const clause = new OrderByClauseStringBuilder(items);
-    this.clauses.push(clause);
+    this.#addClause(clause);
     return this;
   }
 
@@ -235,7 +231,7 @@ export class Builder {
    * // DELETE node1
    */
   delete(...items: string[]): this {
-    this.clauses.push(new DeleteClauseStringBuilder(false, items));
+    this.#addClause(new DeleteClauseStringBuilder(false, items));
     return this;
   }
   /**
@@ -246,8 +242,14 @@ export class Builder {
    * // DETACH DELETE node1
    */
   detachDelete(...items: string[]): this {
-    this.clauses.push(new DeleteClauseStringBuilder(true, items));
+    this.#addClause(new DeleteClauseStringBuilder(true, items));
     return this;
+  }
+
+  #addClause(clause: ShouldBeAdded & StringBuilder) {
+    if (clause.__shouldBeAdded) {
+      this.clauses.push(clause);
+    }
   }
 
   build(): string {

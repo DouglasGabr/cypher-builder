@@ -18,7 +18,7 @@ export class UsingIndexSeekClauseStringBuilder
 {
   constructor(variable: string, label: string, fields: string[]) {
     super(
-      'INDEX SEEK',
+      'USING INDEX SEEK',
       new UsingIndexSeekValueBuilder(variable, label, fields),
     );
   }

@@ -1,3 +1,4 @@
+import { ParametersBag } from '../parameters/ParametersBag';
 import { PatternStringBuilder } from '../patterns/PatternBuilder';
 import { MatchClauseStringBuilder } from './match.clause';
 
@@ -11,7 +12,9 @@ MockedPatternStringBuilder.prototype.build.mockReturnValue(patternBuildResult);
 
 describe('MatchClause', () => {
   it('should build MATCH', () => {
-    const matchClauseBuilder = new MatchClauseStringBuilder();
+    const matchClauseBuilder = new MatchClauseStringBuilder(
+      new PatternStringBuilder(new ParametersBag()),
+    );
     expect(matchClauseBuilder.build()).toBe(`MATCH ${patternBuildResult}`);
   });
 });

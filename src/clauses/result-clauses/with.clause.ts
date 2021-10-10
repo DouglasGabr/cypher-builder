@@ -1,7 +1,7 @@
 import { StringBuilder } from '../../types/string-builder';
 import { ResultClause, ResultClauseStringBuilder } from './result.clause';
 
-export class WithClause extends ResultClause {
+export abstract class WithClause extends ResultClause {
   constructor(distinct?: boolean) {
     super('WITH', distinct);
   }
