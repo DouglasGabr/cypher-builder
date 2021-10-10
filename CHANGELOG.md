@@ -1,3 +1,22 @@
+# 2.2.0 / 2021-10-09
+
+- feat: only add clauses to builder if needed
+  ```typescript
+  const filter = { name: '' }; // empty filter
+  new Builder()
+    .match((m) => m.node('person'))
+    .where((w) => {
+      if (filter.name) {
+        // will not execute
+        w.and('person.name', filter.name);
+      }
+    })
+    .return('person')
+    .build();
+  // MATCH (person)
+  // RETURN person
+  ```
+
 # 2.1.0 / 2021-10-09
 
 - fix(patterns): don't add brackets to empty relationship patterns (`.relationship()`)
@@ -6,13 +25,12 @@
 - feat(clauses): add label predicates to where:
 
   ```typescript
-  builder.where((w) => {
-    w.andLabel('user', 'User').andLabel('admin', ['User', 'Admin']);
-  });
-  ```
-
-  ```
-  WHERE user:User AND admin:User:Admin
+  new Builder()
+    .where((w) => {
+      w.andLabel('user', 'User').andLabel('admin', ['User', 'Admin']);
+    })
+    .build();
+  // WHERE user:User AND admin:User:Admin
   ```
 
 # 2.0.0 / 2021-10-07
