@@ -62,7 +62,7 @@ That will enable your IDE (tested only in VSCode) to suggest values for your nod
 ### Example
 
 ```typescript
-import { Builder, RelationshipDirection } from '@douglasgabr/cypher-builder';
+import { Builder } from '@douglasgabr/cypher-builder';
 
 const queryBuilder = new Builder()
   .match((match) => {
