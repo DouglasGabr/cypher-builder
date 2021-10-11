@@ -1,3 +1,16 @@
+# 3.0.0 / 2021-10-10
+
+- 💥 BREAKING CHANGE: where clause `...Literal` methods removed.
+- feat: add `literal` utility
+  ```typescript
+  import { Builder, literal } from '@douglasgabr/cypher-builder';
+  new Builder()
+    .match((m) => m.node('user', 'User', { id: literal('literal.id') }))
+    .where((w) => w.and('user.name', literal('friend.name')));
+  // MATCH (user:User{ id: literal.id })
+  // WHERE user.name = friend.name
+  ```
+
 # 2.2.0 / 2021-10-09
 
 - feat: only add clauses to builder if needed
