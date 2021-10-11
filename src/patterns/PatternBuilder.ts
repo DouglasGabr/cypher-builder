@@ -11,6 +11,11 @@ import {
   RelationshipLimits,
 } from './Relationship';
 import { ShouldBeAdded } from '../types/should-be-added';
+import { Literal } from '../utils/literal';
+
+type WithLiteral<T> = {
+  [P in keyof T]: T[P] | Literal;
+};
 
 /**
  * @see [Patterns](https://neo4j.com/docs/cypher-manual/current/syntax/patterns/)
@@ -69,7 +74,7 @@ export class PatternBuilder {
   >(
     alias?: string,
     labels?: Label | Label[],
-    properties?: Partial<Properties>,
+    properties?: Partial<WithLiteral<Properties>>,
   ): this {
     const _labels = Array.isArray(labels)
       ? labels
@@ -81,11 +86,14 @@ export class PatternBuilder {
       _properties = Object.entries(properties).reduce(
         (newProperties, [label, value]) => ({
           ...newProperties,
-          [label]: this.parametersBag.add(
-            value,
-            true,
-            alias ? `${alias}_${label}` : label,
-          ),
+          [label]:
+            value instanceof Literal
+              ? value.value
+              : this.parametersBag.add(
+                  value,
+                  true,
+                  alias ? `${alias}_${label}` : label,
+                ),
         }),
         {} as Record<string, string>,
       );
@@ -102,7 +110,7 @@ export class PatternBuilder {
     types?: T | T[],
     alias?: string,
     limits?: RelationshipLimits,
-    properties?: Partial<P>,
+    properties?: Partial<WithLiteral<P>>,
   ): this {
     const _types = Array.isArray(types)
       ? types
@@ -114,7 +122,10 @@ export class PatternBuilder {
       _properties = Object.entries(properties).reduce(
         (newProperties, [label, value]) => ({
           ...newProperties,
-          [label]: this.parametersBag.add(value, true),
+          [label]:
+            value instanceof Literal
+              ? value.value
+              : this.parametersBag.add(value, true),
         }),
         {} as Record<string, string>,
       );

@@ -1,4 +1,5 @@
 import { ParametersBag } from '../parameters/ParametersBag';
+import { literal } from '../utils/literal';
 import { WhereClauseStringBuilder } from './where.clause';
 
 declare module '../types/labels-and-properties' {
@@ -150,8 +151,8 @@ describe('WhereClause', () => {
       );
 
       whereBuilder
-        .andLiteral('field.name', 'other.name')
-        .andNotLiteral('field.lastName', 'CONTAINS', 'other.lastName');
+        .and('field.name', literal('other.name'))
+        .andNot('field.lastName', 'CONTAINS', literal('other.lastName'));
       expect(whereBuilder.build()).toBe(
         'WHERE field.name = other.name AND NOT field.lastName CONTAINS other.lastName',
       );

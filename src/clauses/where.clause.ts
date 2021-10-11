@@ -7,6 +7,7 @@ import {
 import { CypherBuilderNodes } from '..';
 import { Clause } from './base-clause';
 import { ShouldBeAdded } from '../types/should-be-added';
+import { Literal } from '../utils/literal';
 
 type Comparisons =
   | '='
@@ -166,7 +167,7 @@ export abstract class WhereClause extends Clause {
     not: boolean,
     field: string,
     comparator: unknown,
-    value?: unknown,
+    value?: unknown | Literal,
   ): this {
     if (isNullComparator(comparator)) {
       const comp = new NullComparator(comparator, field);
@@ -184,121 +185,56 @@ export abstract class WhereClause extends Clause {
     const comp = new Comparator(
       _comparator,
       field,
-      this.parametersBag.add(_value, true, field),
+      _value instanceof Literal
+        ? _value.value
+        : this.parametersBag.add(_value, true, field),
     );
     return this.#addPredicate(prefix, comp, not);
   }
 
-  andNot(field: string, value: unknown): this;
+  andNot(field: string, value: unknown | Literal): this;
   andNot(field: string, nullComparison: NullComparison): this;
-  andNot(field: string, comparator: Comparisons, value: unknown): this;
-  andNot(field: string, comparator: unknown, value?: unknown): this {
+  andNot(
+    field: string,
+    comparator: Comparisons,
+    value: unknown | Literal,
+  ): this;
+  andNot(field: string, comparator: unknown, value?: unknown | Literal): this {
     return this.#add('AND', true, field, comparator, value);
   }
-  and(field: string, value: unknown): this;
+  and(field: string, value: unknown | Literal): this;
   and(field: string, nullComparison: NullComparison): this;
-  and(field: string, comparator: Comparisons, value: unknown): this;
-  and(field: string, comparator: unknown, value?: unknown): this {
+  and(field: string, comparator: Comparisons, value: unknown | Literal): this;
+  and(field: string, comparator: unknown, value?: unknown | Literal): this {
     return this.#add('AND', false, field, comparator, value);
   }
-  orNot(field: string, value: unknown): this;
+  orNot(field: string, value: unknown | Literal): this;
   orNot(field: string, nullComparison: NullComparison): this;
-  orNot(field: string, comparator: Comparisons, value: unknown): this;
-  orNot(field: string, comparator: unknown, value?: unknown): this {
+  orNot(field: string, comparator: Comparisons, value: unknown | Literal): this;
+  orNot(field: string, comparator: unknown, value?: unknown | Literal): this {
     return this.#add('OR', true, field, comparator, value);
   }
-  or(field: string, value: unknown): this;
+  or(field: string, value: unknown | Literal): this;
   or(field: string, nullComparison: NullComparison): this;
-  or(field: string, comparator: Comparisons, value: unknown): this;
-  or(field: string, comparator: unknown, value?: unknown): this {
+  or(field: string, comparator: Comparisons, value: unknown | Literal): this;
+  or(field: string, comparator: unknown, value?: unknown | Literal): this {
     return this.#add('OR', false, field, comparator, value);
   }
-  xorNot(field: string, value: unknown): this;
+  xorNot(field: string, value: unknown | Literal): this;
   xorNot(field: string, nullComparison: NullComparison): this;
-  xorNot(field: string, comparator: Comparisons, value: unknown): this;
-  xorNot(field: string, comparator: unknown, value?: unknown): this {
+  xorNot(
+    field: string,
+    comparator: Comparisons,
+    value: unknown | Literal,
+  ): this;
+  xorNot(field: string, comparator: unknown, value?: unknown | Literal): this {
     return this.#add('XOR', true, field, comparator, value);
   }
-  xor(field: string, value: unknown): this;
+  xor(field: string, value: unknown | Literal): this;
   xor(field: string, nullComparison: NullComparison): this;
-  xor(field: string, comparator: Comparisons, value: unknown): this;
-  xor(field: string, comparator: unknown, value?: unknown): this {
+  xor(field: string, comparator: Comparisons, value: unknown | Literal): this;
+  xor(field: string, comparator: unknown, value?: unknown | Literal): this {
     return this.#add('XOR', false, field, comparator, value);
-  }
-
-  #addLiteral(
-    prefix: PredicatePrefix,
-    not: boolean,
-    field: string,
-    comparatorOrValue: Comparisons | string,
-    value?: string,
-  ): this {
-    let _value: string;
-    let _comparator: Comparisons;
-    if (typeof value === 'undefined') {
-      _comparator = '=';
-      _value = comparatorOrValue as string;
-    } else {
-      _comparator = comparatorOrValue as Comparisons;
-      _value = value;
-    }
-    const comp = new Comparator(_comparator, field, _value);
-    return this.#addPredicate(prefix, comp, not);
-  }
-
-  andLiteral(field: string, value: string): this;
-  andLiteral(field: string, comparator: Comparisons, value: string): this;
-  andLiteral(
-    field: string,
-    comparator: string | Comparisons,
-    value?: string,
-  ): this {
-    return this.#addLiteral('AND', false, field, comparator, value);
-  }
-  andNotLiteral(field: string, value: string): this;
-  andNotLiteral(field: string, comparator: Comparisons, value: string): this;
-  andNotLiteral(
-    field: string,
-    comparator: Comparisons | string,
-    value?: string,
-  ): this {
-    return this.#addLiteral('AND', true, field, comparator, value);
-  }
-  orLiteral(field: string, value: string): this;
-  orLiteral(field: string, comparator: Comparisons, value: string): this;
-  orLiteral(
-    field: string,
-    comparator: string | Comparisons,
-    value?: string,
-  ): this {
-    return this.#addLiteral('OR', false, field, comparator, value);
-  }
-  orNotLiteral(field: string, value: string): this;
-  orNotLiteral(field: string, comparator: Comparisons, value: string): this;
-  orNotLiteral(
-    field: string,
-    comparator: Comparisons | string,
-    value?: string,
-  ): this {
-    return this.#addLiteral('OR', true, field, comparator, value);
-  }
-  xorLiteral(field: string, value: string): this;
-  xorLiteral(field: string, comparator: Comparisons, value: string): this;
-  xorLiteral(
-    field: string,
-    comparator: string | Comparisons,
-    value?: string,
-  ): this {
-    return this.#addLiteral('XOR', false, field, comparator, value);
-  }
-  xorNotLiteral(field: string, value: string): this;
-  xorNotLiteral(field: string, comparator: Comparisons, value: string): this;
-  xorNotLiteral(
-    field: string,
-    comparator: Comparisons | string,
-    value?: string,
-  ): this {
-    return this.#addLiteral('XOR', true, field, comparator, value);
   }
 
   #addLabel(

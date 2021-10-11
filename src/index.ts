@@ -28,6 +28,8 @@ import {
 } from './patterns/PatternBuilder';
 import { ShouldBeAdded } from './types/should-be-added';
 export * from './types/labels-and-properties';
+export { literal } from './utils/literal';
+export type { Literal } from './utils/literal';
 
 type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
 
