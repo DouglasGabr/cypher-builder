@@ -1,6 +1,7 @@
 type ClausePrefix =
   | 'MATCH'
   | 'MERGE'
+  | 'CREATE'
   | 'WHERE'
   | 'RETURN'
   | 'SKIP'

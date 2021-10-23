@@ -27,6 +27,7 @@ import {
   PatternStringBuilder,
 } from './patterns/PatternBuilder';
 import { ShouldBeAdded } from './types/should-be-added';
+import { CreateClauseStringBuilder } from './clauses/create.clause';
 export * from './types/labels-and-properties';
 export { literal } from './utils/literal';
 export type { Literal } from './utils/literal';
@@ -108,6 +109,30 @@ export class Builder {
     const whereBuilder = new WhereClauseStringBuilder(this.parametersBag);
     builder(whereBuilder);
     this.#addClause(whereBuilder);
+    return this;
+  }
+
+  /**
+   * @param builder pattern builder
+   * @see [CREATE](https://neo4j.com/docs/cypher-manual/current/clauses/create/)
+   * @example
+   * .create(c => {
+   *   c.node('person', 'Person')
+   * })
+   * // CREATE (person:Person)
+   * @example
+   * .create(c => {
+   *   c.node('a')
+   *     .relationship('out', 'KNOWS')
+   *     .node('b')
+   * })
+   * // CREATE (a)-[:KNOWS]->(b)
+   */
+  create(builder: BuilderParameter<PatternBuilder>) {
+    const patternBuilder = new PatternStringBuilder(this.parametersBag);
+    builder(patternBuilder);
+    const createClause = new CreateClauseStringBuilder(patternBuilder);
+    this.#addClause(createClause);
     return this;
   }
 
