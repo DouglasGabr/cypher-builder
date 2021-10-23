@@ -1,3 +1,12 @@
+# 3.1.0 / 2021-10-23
+
+- feat(clauses): add create clause
+  ```typescript
+  import { Builder } from '@douglasgabr/cypher-builder';
+  new Builder().create((c) => c.node('user', 'User'));
+  // CREATE (user:User)
+  ```
+
 # 3.0.0 / 2021-10-10
 
 - 💥 BREAKING CHANGE: where clause `...Literal` methods removed.
