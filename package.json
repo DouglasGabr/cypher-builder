@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "build": "tsc --project tsconfig.build.json",
-    "prepare": "husky install"
+    "install-husky": "husky install"
   },
   "repository": {
     "type": "git",
