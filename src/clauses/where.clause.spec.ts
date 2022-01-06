@@ -168,4 +168,64 @@ describe('WhereClause', () => {
       });
     });
   });
+  describe('Function predicates', () => {
+    describe.each([
+      { functionName: 'All' },
+      { functionName: 'Any' },
+      { functionName: 'None' },
+      { functionName: 'Single' },
+    ] as const)('$functionName', ({ functionName }) => {
+      it(`should build WHERE with ${functionName} predicate function`, () => {
+        const builder = new WhereClauseStringBuilder(new ParametersBag());
+        builder[`and${functionName}`]('item', 'list', (w) =>
+          w.and('item', '>', 0),
+        );
+        const result = builder.build();
+        expect(result).toBe(
+          `WHERE ${functionName.toLowerCase()}(item IN list WHERE item > $item)`,
+        );
+      });
+    });
+    describe('exists', () => {
+      describe('variable', () => {
+        it('should build exists predicate with variable', () => {
+          const builder = new WhereClauseStringBuilder(new ParametersBag());
+          builder.andExists('item');
+          const result = builder.build();
+          expect(result).toBe('WHERE exists(item)');
+        });
+      });
+      describe('pattern', () => {
+        it('should build exists predicate with pattern', () => {
+          const builder = new WhereClauseStringBuilder(new ParametersBag());
+          builder.andExists((p) => p.node('n1').relationship('out').node('n2'));
+          const result = builder.build();
+          expect(result).toBe('WHERE exists((n1)-->(n2))');
+        });
+      });
+    });
+    describe('all predicates together', () => {
+      it('should build WHERE with all predicate functions', () => {
+        const builder = new WhereClauseStringBuilder(new ParametersBag());
+        builder
+          .andAll('itemAll', 'listAll', (w) => w.and('itemAll', '>', 0))
+          .orAny('itemAny', 'listAny', (w) => {
+            w.and('itemAny', 'STARTS WITH', 'test');
+          })
+          .andNotNone('itemNone', 'listNone', (w) => {
+            w.and('itemNone', '<', 0);
+          })
+          .xorNotSingle('itemSingle', 'listSingle', (w) => {
+            w.and('itemSingle', 'IS NULL');
+          });
+        const result = builder.build();
+        expect(result).toBe(
+          'WHERE all(itemAll IN listAll WHERE itemAll > $itemAll) ' +
+            'OR any(itemAny IN listAny WHERE itemAny STARTS WITH $itemAny) ' +
+            'AND NOT none(itemNone IN listNone WHERE itemNone < $itemNone) ' +
+            'XOR NOT single(itemSingle IN listSingle WHERE itemSingle IS NULL)',
+        );
+      });
+    });
+  });
 });
