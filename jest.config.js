@@ -4,7 +4,7 @@ const config = {
   testEnvironment: 'node',
   clearMocks: true,
   testMatch: ['**/*.spec.ts'],
-  setupFilesAfterEnv: ['jest-extended'],
+  setupFilesAfterEnv: ['jest-extended/all'],
   collectCoverageFrom: ['./src/**/*.ts'],
 };
 module.exports = config;
