@@ -160,32 +160,20 @@ export abstract class WhereClause extends Clause {
 
   #addPattern(
     prefix: PredicatePrefix,
-    builder: (patternBuilder: PatternBuilder) => unknown,
     not: boolean,
+    builder: (patternBuilder: PatternBuilder) => unknown,
   ) {
     const patternBuilder = new PatternStringBuilder(this.parametersBag);
     builder(patternBuilder);
     return this.#addPredicate(prefix, patternBuilder, not);
   }
 
-  andNotPattern(builder: (patternBuilder: PatternBuilder) => unknown): this {
-    return this.#addPattern('AND', builder, true);
-  }
-  andPattern(builder: (patternBuilder: PatternBuilder) => unknown): this {
-    return this.#addPattern('AND', builder, false);
-  }
-  orNotPattern(builder: (patternBuilder: PatternBuilder) => unknown): this {
-    return this.#addPattern('OR', builder, true);
-  }
-  orPattern(builder: (patternBuilder: PatternBuilder) => unknown): this {
-    return this.#addPattern('OR', builder, false);
-  }
-  xorNotPattern(builder: (patternBuilder: PatternBuilder) => unknown): this {
-    return this.#addPattern('XOR', builder, true);
-  }
-  xorPattern(builder: (patternBuilder: PatternBuilder) => unknown): this {
-    return this.#addPattern('XOR', builder, false);
-  }
+  andPattern = this.#addPattern.bind(this, 'AND', false);
+  andNotPattern = this.#addPattern.bind(this, 'AND', true);
+  orPattern = this.#addPattern.bind(this, 'OR', false);
+  orNotPattern = this.#addPattern.bind(this, 'OR', true);
+  xorPattern = this.#addPattern.bind(this, 'XOR', false);
+  xorNotPattern = this.#addPattern.bind(this, 'XOR', true);
 
   #add(
     prefix: PredicatePrefix,

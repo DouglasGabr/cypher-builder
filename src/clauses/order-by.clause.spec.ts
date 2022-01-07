@@ -19,4 +19,14 @@ describe('ORDER BY', () => {
     const result = builder.build();
     expect(result).toBe('ORDER BY order.field DESC, other');
   });
+  describe('__shouldBeAdded', () => {
+    it('should return true if orderBy contains items', () => {
+      const builder = new OrderByClauseStringBuilder(['order.field']);
+      expect(builder.__shouldBeAdded).toBeTrue();
+    });
+    it('should return false if orderBy is empty', () => {
+      const builder = new OrderByClauseStringBuilder([]);
+      expect(builder.__shouldBeAdded).toBeFalse();
+    });
+  });
 });

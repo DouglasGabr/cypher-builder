@@ -228,4 +228,15 @@ describe('WhereClause', () => {
       });
     });
   });
+  describe('__shouldBeAdded', () => {
+    it('should return true if there are predicates', () => {
+      const builder = new WhereClauseStringBuilder(new ParametersBag());
+      builder.and('prop', '=', 1);
+      expect(builder.__shouldBeAdded).toBeTrue();
+    });
+    it('should return false if there are no predicates', () => {
+      const builder = new WhereClauseStringBuilder(new ParametersBag());
+      expect(builder.__shouldBeAdded).toBeFalse();
+    });
+  });
 });
