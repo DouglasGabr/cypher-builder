@@ -7,6 +7,12 @@ declare module '../types/labels-and-properties' {
     User: { id: string };
     Post: { id: string };
   }
+  export interface CypherBuilderRelationships {
+    PURCHASES: Record<string, never>;
+    IS_FRIEND: {
+      since: number;
+    };
+  }
 }
 
 describe('PatternBuilder', () => {
@@ -20,6 +26,16 @@ describe('PatternBuilder', () => {
       const builder = new PatternStringBuilder(new ParametersBag());
       builder.node('user', 'User', { id: literal('literal.id') });
       expect(builder.build()).toBe('(user:User{ id: literal.id })');
+    });
+    it('should build a relationship with properties', () => {
+      const builder = new PatternStringBuilder(new ParametersBag());
+      builder
+        .node()
+        .relationship('either', undefined, 'friend', undefined, {
+          since: 2010,
+        })
+        .node();
+      expect(builder.build()).toBe('()-[friend { since: $friend_since }]-()');
     });
   });
 });

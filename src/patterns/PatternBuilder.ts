@@ -125,7 +125,11 @@ export class PatternBuilder {
           [label]:
             value instanceof Literal
               ? value.value
-              : this.parametersBag.add(value, true),
+              : this.parametersBag.add(
+                  value,
+                  true,
+                  alias ? `${alias}_${label}` : label,
+                ),
         }),
         {} as Record<string, string>,
       );

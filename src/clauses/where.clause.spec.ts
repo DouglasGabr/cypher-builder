@@ -9,7 +9,9 @@ declare module '../types/labels-and-properties' {
   }
   export interface CypherBuilderRelationships {
     PURCHASES: Record<string, never>;
-    IS_FRIEND: Record<string, never>;
+    IS_FRIEND: {
+      since: number;
+    };
   }
 }
 
