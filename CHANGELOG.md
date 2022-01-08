@@ -1,3 +1,22 @@
+# 3.3.0 / 2022-01-07
+
+- feat(builder): ✨ add `addParameter` to builder
+
+  - enable option to add custom arbitrary parameters to builder
+
+  ```typescript
+  import { Builder } from '@douglasgabr/cypher-builder';
+  const builder = new Builder();
+
+  // returns builder for method chaining
+  builder.addParameter('value', 'name');
+  // { value: 'name' }
+
+  // if parameter name is not provided, it will be generated
+  const generatedParameterName = builder.addParameter('value');
+  // { [generatedParameterName]: 'value' }
+  ```
+
 # 3.2.0 / 2022-01-06
 
 - feat(clauses): add function predicates to where clause
