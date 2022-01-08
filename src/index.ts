@@ -273,6 +273,32 @@ export class Builder {
     return this;
   }
 
+  /**
+   * Add a value to the query parameters
+   * @param value value to be provided as a parameter
+   * @returns string with the generated parameter name
+   */
+  addParameter(value: unknown): string;
+  /**
+   * Add a value to the query parameters
+   * @param value value to be provided as a parameter
+   * @param alias alias for the parameter (will replace any existing parameter with same alias)
+   * @returns Builder instance for method chaining
+   */
+  addParameter(value: unknown, alias: string): this;
+  addParameter(value: unknown, alias?: string): this | string {
+    const param = this.parametersBag.add(
+      value,
+      false,
+      alias,
+      typeof alias === 'string',
+    );
+    if (typeof alias === 'undefined') {
+      return param;
+    }
+    return this;
+  }
+
   #addClause(clause: ShouldBeAdded & StringBuilder) {
     if (clause.__shouldBeAdded) {
       this.clauses.push(clause);
