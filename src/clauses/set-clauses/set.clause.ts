@@ -3,6 +3,7 @@ import { ParametersBag } from '../../parameters/ParametersBag';
 import { ShouldBeAdded } from '../../types/should-be-added';
 import { StringBuilder } from '../../types/string-builder';
 import { Clause } from '../base-clause';
+import { Literal } from '../../utils/literal';
 
 interface ISetUpdate extends StringBuilder {
   __type: 'ISetUpdate';
@@ -47,16 +48,20 @@ export abstract class SetClause extends Clause {
    * .set('user', { name: 'New Name' }, '+=')
    * // user += $user
    * // $user => { name: 'New Name' }
+   * .set('user.name', literal('otherName'))
+   * // user.name = otherName
    */
   set(
     updated: string,
-    value: unknown,
+    value: unknown | Literal,
     operator: FieldSetUpdateOperator = '=',
   ): this {
     this.updates.push(
       new FieldSetUpdate(
         updated,
-        this.parametersBag.add(value, true, updated),
+        value instanceof Literal
+          ? value.value
+          : this.parametersBag.add(value, true, updated),
         operator,
       ),
     );
@@ -64,11 +69,7 @@ export abstract class SetClause extends Clause {
   }
 
   /**
-   * @example
-   * .setLiteral('user.lastName', 'parent.lastName')
-   * // user.lastName = parent.lastName
-   * .setLiteral('clone', 'user', '+=')
-   * // clone += user
+   * @deprecated use `.set('...', literal('literal'))` instead
    */
   setLiteral(
     updated: string,

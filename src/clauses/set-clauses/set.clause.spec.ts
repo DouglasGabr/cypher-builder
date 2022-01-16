@@ -1,3 +1,4 @@
+import { literal } from '../..';
 import { ParametersBag } from '../../parameters/ParametersBag';
 import { SetClauseStringBuilder } from './set.clause';
 
@@ -28,20 +29,21 @@ describe('SetClause', () => {
       expect(result).toBe('SET field += $field');
     });
   });
-  describe('setLiteral', () => {
+  describe('literals', () => {
     it('should set field with literal', () => {
-      const clause = new SetClauseStringBuilder(
-        'SET',
-        new ParametersBag(),
-      ).setLiteral('field', 'newValue');
+      const clause = new SetClauseStringBuilder('SET', new ParametersBag()).set(
+        'field',
+        literal('newValue'),
+      );
       const result = clause.build();
       expect(result).toBe('SET field = newValue');
     });
     it('should set field with literal using merge operator', () => {
-      const clause = new SetClauseStringBuilder(
-        'SET',
-        new ParametersBag(),
-      ).setLiteral('field', 'newValue', '+=');
+      const clause = new SetClauseStringBuilder('SET', new ParametersBag()).set(
+        'field',
+        literal('newValue'),
+        '+=',
+      );
       const result = clause.build();
       expect(result).toBe('SET field += newValue');
     });
