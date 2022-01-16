@@ -1,3 +1,18 @@
+# 3.4.0 / 2022-01-16
+
+- refactor(clauses): enable use of literal util in set clause
+
+  ```typescript
+  import { Builder, literal } from '@douglasgabr/cypher-builder';
+  new Builder().set((s) => {
+    // deprecated
+    s.setLiteral('foo', 'bar');
+
+    // new
+    s.set('foo', literal('bar'));
+  });
+  ```
+
 # 3.3.0 / 2022-01-07
 
 - feat(builder): ✨ add `addParameter` to builder
