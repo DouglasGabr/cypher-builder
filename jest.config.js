@@ -13,7 +13,7 @@ const config = {
           parser: {
             syntax: 'typescript',
           },
-          target: 'es2021',
+          target: 'es2019',
         },
         sourceMaps: 'inline',
       },
