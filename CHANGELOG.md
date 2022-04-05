@@ -1,3 +1,16 @@
+# 3.4.1 / 2022-04-05
+
+- fix(pagination): use neo4j driver `int` constructor for limit and skip
+
+  ```typescript
+  import { Builder } from '@douglasgabr/cypher-builder';
+  import { int } from 'neo4j-driver';
+
+  new Builder().limit(1).skip(2);
+  // parameters will be
+  const parameters = { limit: int(1), skip: int(2) };
+  ```
+
 # 3.4.0 / 2022-01-16
 
 - refactor(clauses): enable use of literal util in set clause
