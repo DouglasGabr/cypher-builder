@@ -4,10 +4,6 @@ Fluent CQL Builder for Neo4j
 
 [![Node.js Package](https://github.com/DouglasGabr/cypher-builder/actions/workflows/npmpublish.yml/badge.svg)](https://github.com/DouglasGabr/cypher-builder/actions/workflows/npmpublish.yml)
 
-## 🚨🚨🚨 Warning 🚨🚨🚨
-
-**This package is in early stages of development, use it at your own risk.**
-
 ## Installation
 
 ```bash
