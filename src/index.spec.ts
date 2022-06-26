@@ -69,4 +69,12 @@ describe('Builder', () => {
       });
     });
   });
+  describe('interpolate', () => {
+    it('should interpolate parameters in query', () => {
+      // arrange
+      const builder = new Builder().match((m) =>
+        m.node('user1', 'User', { id: '1' }),
+      );
+    });
+  });
 });
