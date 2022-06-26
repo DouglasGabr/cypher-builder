@@ -501,6 +501,18 @@ export class Builder {
     };
   }
 
+  interpolate(): string {
+    const { parameters, query } = this.buildQueryObject();
+    return query.replace(/\$(\S+)/g, (match, paramName) => {
+      return match;
+      // const param = parameters[paramName];
+      // if (typeof param === 'undefined') {
+      //   throw new Error(`Parameter ${paramName} is not defined`);
+      // }
+      // return param;
+    });
+  }
+
   run<T>(runner: QueryRunner<T>): Promise<T>;
   /**
    * @deprecated use `run(runner: QueryRunner<T>)` instead
