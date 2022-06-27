@@ -502,14 +502,9 @@ export class Builder {
   }
 
   interpolate(): string {
-    const { parameters, query } = this.buildQueryObject();
-    return query.replace(/\$(\S+)/g, (match, paramName) => {
-      return match;
-      // const param = parameters[paramName];
-      // if (typeof param === 'undefined') {
-      //   throw new Error(`Parameter ${paramName} is not defined`);
-      // }
-      // return param;
+    const query = this.build();
+    return query.replace(/\$(\S+)/g, (_, paramName) => {
+      return this.parametersBag.getRaw(paramName);
     });
   }
 
