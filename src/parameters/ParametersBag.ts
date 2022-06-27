@@ -1,4 +1,4 @@
-import neo4j from 'neo4j-driver';
+import { RawValueFormatterFactory } from './RawValueFormatter/RawValueFormatter.factory';
 
 export class ParametersBag {
   private parametersMap: Map<string, unknown>;
@@ -34,29 +34,6 @@ export class ParametersBag {
     if (typeof value === 'undefined') {
       throw new Error(`Parameter ${key} not found`);
     }
-    return this.formatValue(value);
-  }
-
-  private formatValue(value: unknown): string {
-    const returnValue =
-      typeof value === 'number'
-        ? value.toString()
-        : typeof value === 'string'
-        ? `"${value.replace(/"/g, '\\"')}"`
-        : value instanceof neo4j.types.DateTime
-        ? `datetime("${value.toString()}")`
-        : typeof value === 'boolean'
-        ? value.toString()
-        : Array.isArray(value)
-        ? `[${value.map((v) => this.formatValue(v)).join(', ')}]`
-        : typeof value === 'object' && value
-        ? `{ ${Object.entries(value)
-            .map(([k, v]) => `${k}: ${this.formatValue(v)}`)
-            .join(', ')} }`
-        : '';
-    if (returnValue === '') {
-      throw new Error(`Unsupported value type: ${typeof value}`);
-    }
-    return returnValue;
+    return RawValueFormatterFactory.create(value).format();
   }
 }
