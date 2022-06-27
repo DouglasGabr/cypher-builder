@@ -240,28 +240,31 @@ describe('Builder', () => {
   describe('interpolate', () => {
     it('should interpolate parameters in query', () => {
       // arrange
-      const datetime = '2022-04-20T13:42:55Z';
+      const datetimeString = '2022-04-20T13:42:55Z';
+      const datetime = neo4j.types.DateTime.fromStandardDate(
+        new Date(datetimeString),
+      );
       const builder = new Builder()
         .match((m) => m.node('user1', 'User', { id: '1' }))
         .where((w) => {
           w.or('user1.id', 'IN', [1, 2, 3])
-            .or(
-              'user1.createdAt',
-              '>=',
-              neo4j.types.DateTime.fromStandardDate(new Date(datetime)),
-            )
+            .or('user1.createdAt', '>=', datetime)
             .or('user1.awake', true);
         })
-        .set((s) => s.set('user1', { id: '2' }));
+        .set((s) => s.set('user1', { id: '2' }))
+        .skip(10)
+        .limit(20);
       // act
       const query = builder.interpolate();
       // assert
       expect(query).toBe(
         'MATCH (user1:User{ id: "1" })\n' +
           'WHERE user1.id IN [1, 2, 3]' +
-          ' OR user1.createdAt >= datetime("2022-04-20T13:42:55Z")' +
+          ` OR user1.createdAt >= datetime("${datetime.toString()}")` +
           ' OR user1.awake = true\n' +
-          'SET user1 = { id: "2" }',
+          'SET user1 = { id: "2" }\n' +
+          'SKIP 10\n' +
+          'LIMIT 20',
       );
     });
   });
