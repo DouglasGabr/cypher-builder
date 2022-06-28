@@ -501,6 +501,10 @@ export class Builder {
     };
   }
 
+  /**
+   * Generates a query with parameters as literals, useful for debug purposes
+   * @returns query with parameters interpolated into the query as literals
+   */
   interpolate(): string {
     const query = this.build();
     return query.replace(/\$(\S+)/g, (_, paramName) => {
