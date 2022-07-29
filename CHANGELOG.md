@@ -1,3 +1,15 @@
+# 3.5.0 / 2022-07-29
+
+- feat(patterns): ✨ add path name variable to MATCH
+
+  ```typescript
+  import { Builder } from '@douglasgabr/cypher-builder';
+  import { int } from 'neo4j-driver';
+
+  new Builder().match('p', (m) => m.node('a').relationship().node('b'));
+  // MATCH p = (a)--(b)
+  ```
+
 # 3.4.1 / 2022-04-05
 
 - fix(pagination): use neo4j driver `int` constructor for limit and skip
