@@ -22,7 +22,10 @@ type WithLiteral<T> = {
  */
 export class PatternBuilder {
   protected patterns: StringBuilder[] = [];
-  constructor(protected parametersBag: ParametersBag) {}
+  constructor(
+    protected parametersBag: ParametersBag,
+    protected pathName?: string,
+  ) {}
 
   /**
    * @example
@@ -149,6 +152,9 @@ export class PatternStringBuilder
     return this.patterns.length > 0;
   }
   build() {
-    return this.patterns.map((p) => p.build()).join('');
+    const patternString = this.patterns.map((p) => p.build()).join('');
+    return this.pathName
+      ? `${this.pathName} = ${patternString}`
+      : patternString;
   }
 }

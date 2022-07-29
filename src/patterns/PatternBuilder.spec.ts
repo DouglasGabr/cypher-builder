@@ -38,4 +38,14 @@ describe('PatternBuilder', () => {
       expect(builder.build()).toBe('()-[friend { since: $friend_since }]-()');
     });
   });
+  describe('path variable', () => {
+    it('should build a path with variable', () => {
+      const builder = new PatternStringBuilder(new ParametersBag(), 'p')
+        .node('a')
+        .relationship()
+        .node('b');
+
+      expect(builder.build()).toBe('p = (a)--(b)');
+    });
+  });
 });

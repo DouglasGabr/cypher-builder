@@ -48,6 +48,25 @@ export class Builder {
   private clauses: StringBuilder[] = [];
 
   /**
+   * @param pathName path name
+   * @param builder pattern builder
+   * @see [MATCH](https://neo4j.com/docs/cypher-manual/current/clauses/match/)
+   * @see [Assigning to path variables](https://neo4j.com/docs/cypher-manual/current/syntax/patterns/#cypher-pattern-path-variables)
+   * @example
+   * .match('p', m => {
+   *   m.node('person', 'Person')
+   * })
+   * // MATCH p = (person:Person)
+   * @example
+   * .match('p', m => {
+   *   m.node('a')
+   *     .relationship('out', 'KNOWS')
+   *     .node('b')
+   * })
+   * // MATCH p = (a)-[:KNOWS]->(b)
+   */
+  match(pathName: string, builder: BuilderParameter<PatternBuilder>): this;
+  /**
    * @param builder pattern builder
    * @see [MATCH](https://neo4j.com/docs/cypher-manual/current/clauses/match/)
    * @example
@@ -63,8 +82,19 @@ export class Builder {
    * })
    * // MATCH (a)-[:KNOWS]->(b)
    */
-  match(builder: BuilderParameter<PatternBuilder>) {
-    const patternBuilder = new PatternStringBuilder(this.parametersBag);
+  match(builder: BuilderParameter<PatternBuilder>): this;
+  match(
+    a: BuilderParameter<PatternBuilder> | string,
+    b?: BuilderParameter<PatternBuilder>,
+  ) {
+    const { pathName, builder } =
+      typeof a === 'string'
+        ? { pathName: a, builder: b! }
+        : { pathName: undefined, builder: a };
+    const patternBuilder = new PatternStringBuilder(
+      this.parametersBag,
+      pathName,
+    );
     builder(patternBuilder);
     const matchClause = new MatchClauseStringBuilder(patternBuilder);
     this.#addClause(matchClause);
