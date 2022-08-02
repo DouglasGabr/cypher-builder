@@ -1,6 +1,16 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { CypherBuilderNodes } from '../types/labels-and-properties';
 
+declare module '../types/labels-and-properties' {
+  export interface CypherBuilderNodes {
+    Person: {
+      id: string;
+      name: string;
+      age: number;
+    };
+  }
+}
+
 type VarType<Type, Value> = {
   __type: Type;
   __value: Value;
@@ -20,27 +30,42 @@ type VariableTypes<
 
 type A = VariableTypes<{ a: PrimitiveVarType<string> }>;
 type B = VariableTypes<
-  { b: PrimitiveVarType<number>; c: NodeVarType<'User'> },
+  { b: PrimitiveVarType<number>; c: NodeVarType<'Person'> },
   A
 >;
 
-type SetOptionsKey<Variables, Key extends keyof Variables & string> =
-  | Key
-  | (Variables[Key] extends NodeVarType<infer Label>
-      ? `${Key}.${keyof CypherBuilderNodes[Label] & string}`
-      : never);
-
-type NodeVarTypeKey<
-  Variables,
-  Key extends keyof Variables & string,
-> = Variables[Key] extends NodeVarType<infer Label>
-  ? `${Key}.${keyof CypherBuilderNodes[Label] & string}`
-  : never;
-
-type SetOptions<Variables extends Record<string, VarType<unknown, unknown>>> = {
+type AnyNodeVarType = NodeVarType<keyof CypherBuilderNodes>;
+type RootVariablesSetOptions<
+  Variables extends Record<string, VarType<unknown, unknown>>,
+> = {
   [Key in keyof Variables & string]: Variables[Key]['__value'];
-} & {
-  [Key in keyof Variables & string as NodeVarTypeKey<Variables, Key>]: 1;
 };
 
-const setOptions: SetOptions<B> = {};
+type NodeVariablesSetOptions<
+  Variables extends Record<string, VarType<unknown, unknown>>,
+> = {
+  [Key in keyof Variables & string]: Variables[Key] extends AnyNodeVarType
+    ? RootVariablesSetOptions<{
+        [Sub in keyof Variables[Key]['__value'] &
+          string as `${Key}.${Sub}`]: PrimitiveVarType<
+          Variables[Key]['__value'][Sub]
+        >;
+      }>
+    : never;
+}[keyof Variables & string];
+
+type SetOptions<Variables extends Record<string, VarType<unknown, unknown>>> =
+  RootVariablesSetOptions<Variables> & NodeVariablesSetOptions<Variables>;
+
+class Test<Variables extends Record<string, VarType<unknown, unknown>>> {
+  set<Key extends keyof SetOptions<Variables>>(
+    key: Key,
+    value: SetOptions<Variables>[Key],
+  ) {
+    console.log('set', key, value);
+  }
+}
+
+const t = new Test<B>();
+
+t.set('c.age', 42);
