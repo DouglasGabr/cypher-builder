@@ -1,5 +1,6 @@
 import { literal } from '../..';
 import { ParametersBag } from '../../parameters/ParametersBag';
+import { PrimitiveVarType } from '../../utils/variable-types';
 import { SetClauseStringBuilder } from './set.clause';
 
 declare module '../../types/labels-and-properties' {
@@ -12,38 +13,32 @@ declare module '../../types/labels-and-properties' {
 describe('SetClause', () => {
   describe('set', () => {
     it('should set field', () => {
-      const clause = new SetClauseStringBuilder('SET', new ParametersBag()).set(
-        'field',
-        'newValue',
-      );
+      const clause = new SetClauseStringBuilder<{
+        field: PrimitiveVarType<string>;
+      }>('SET', new ParametersBag()).set('field', 'value');
       const result = clause.build();
       expect(result).toBe('SET field = $field');
     });
     it('should set field using merge operator', () => {
-      const clause = new SetClauseStringBuilder('SET', new ParametersBag()).set(
-        'field',
-        'newValue',
-        '+=',
-      );
+      const clause = new SetClauseStringBuilder<{
+        field: PrimitiveVarType<string>;
+      }>('SET', new ParametersBag()).set('field', '+=', 'newValue');
       const result = clause.build();
       expect(result).toBe('SET field += $field');
     });
   });
   describe('literals', () => {
     it('should set field with literal', () => {
-      const clause = new SetClauseStringBuilder('SET', new ParametersBag()).set(
-        'field',
-        literal('newValue'),
-      );
+      const clause = new SetClauseStringBuilder<{
+        field: PrimitiveVarType<string>;
+      }>('SET', new ParametersBag()).set('field', literal('newValue'));
       const result = clause.build();
       expect(result).toBe('SET field = newValue');
     });
     it('should set field with literal using merge operator', () => {
-      const clause = new SetClauseStringBuilder('SET', new ParametersBag()).set(
-        'field',
-        literal('newValue'),
-        '+=',
-      );
+      const clause = new SetClauseStringBuilder<{
+        field: PrimitiveVarType<string>;
+      }>('SET', new ParametersBag()).set('field', '+=', literal('newValue'));
       const result = clause.build();
       expect(result).toBe('SET field += newValue');
     });

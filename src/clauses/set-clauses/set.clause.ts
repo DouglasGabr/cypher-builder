@@ -4,6 +4,7 @@ import { ShouldBeAdded } from '../../types/should-be-added';
 import { StringBuilder } from '../../types/string-builder';
 import { Clause } from '../base-clause';
 import { Literal } from '../../utils/literal';
+import { SetOptions, Variables } from '../../utils/variable-types';
 
 interface ISetUpdate extends StringBuilder {
   __type: 'ISetUpdate';
@@ -33,7 +34,7 @@ class LabelSetUpdate implements ISetUpdate {
 
 type SetClausePrefix = 'SET' | 'ON CREATE SET' | 'ON MATCH SET';
 
-export abstract class SetClause extends Clause {
+export abstract class SetClause<TVariables extends Variables> extends Clause {
   protected updates: ISetUpdate[] = [];
 
   constructor(prefix: SetClausePrefix, private parametersBag: ParametersBag) {
@@ -45,38 +46,50 @@ export abstract class SetClause extends Clause {
    * .set('user.name', 'New Name')
    * // user.name = $user_name
    * // $user_name => 'New Name'
-   * .set('user', { name: 'New Name' }, '+=')
-   * // user += $user
-   * // $user => { name: 'New Name' }
    * .set('user.name', literal('otherName'))
    * // user.name = otherName
    */
-  set(
-    updated: string,
-    value: unknown | Literal,
-    operator: FieldSetUpdateOperator = '=',
+  set<Key extends keyof SetOptions<TVariables>>(
+    key: Key,
+    value: SetOptions<TVariables>[Key],
+  ): this;
+  /**
+   * @example
+   * .set('user', '+=', { name: 'New Name' })
+   * // user += $user
+   * // $user => { name: 'New Name' }
+   * .set('user', '+=', literal('otherUser'))
+   * // user += otherName
+   */
+  set<Key extends keyof SetOptions<TVariables> & string>(
+    key: Key,
+    operator: FieldSetUpdateOperator,
+    value: SetOptions<TVariables>[Key],
+  ): this;
+  set<Key extends keyof SetOptions<TVariables> & string>(
+    key: Key,
+    operatorOrValue: FieldSetUpdateOperator | SetOptions<TVariables>[Key],
+    valueWhenOperatorIsUsed?: SetOptions<TVariables>[Key],
   ): this {
+    const { operator, value } =
+      typeof valueWhenOperatorIsUsed === 'undefined'
+        ? {
+            operator: '=' as FieldSetUpdateOperator,
+            value: operatorOrValue as SetOptions<TVariables>[Key],
+          }
+        : {
+            operator: operatorOrValue as FieldSetUpdateOperator,
+            value: valueWhenOperatorIsUsed!,
+          };
     this.updates.push(
       new FieldSetUpdate(
-        updated,
+        key as string,
         value instanceof Literal
           ? value.value
-          : this.parametersBag.add(value, true, updated),
+          : this.parametersBag.add(value, true, key as string),
         operator,
       ),
     );
-    return this;
-  }
-
-  /**
-   * @deprecated use `.set('...', literal('literal'))` instead
-   */
-  setLiteral(
-    updated: string,
-    value: string,
-    operator: FieldSetUpdateOperator = '=',
-  ): this {
-    this.updates.push(new FieldSetUpdate(updated, value, operator));
     return this;
   }
 
@@ -99,8 +112,8 @@ export abstract class SetClause extends Clause {
   }
 }
 
-export class SetClauseStringBuilder
-  extends SetClause
+export class SetClauseStringBuilder<TVariables extends Variables>
+  extends SetClause<TVariables>
   implements StringBuilder, ShouldBeAdded
 {
   get __shouldBeAdded() {

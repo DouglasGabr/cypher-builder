@@ -28,6 +28,7 @@ import {
 } from './patterns/PatternBuilder';
 import { ShouldBeAdded } from './types/should-be-added';
 import { CreateClauseStringBuilder } from './clauses/create.clause';
+import { Variables } from './utils/variable-types';
 export * from './types/labels-and-properties';
 export { literal } from './utils/literal';
 export type { Literal } from './utils/literal';
@@ -43,7 +44,8 @@ export type { OrderByDirection, OrderByItem } from './clauses/order-by.clause';
 
 type BuilderParameter<T> = (builder: T) => unknown;
 
-export class Builder {
+// eslint-disable-next-line @typescript-eslint/ban-types
+export class Builder<TVariables extends Variables = {}> {
   private parametersBag = new ParametersBag();
   private clauses: StringBuilder[] = [];
 
@@ -245,20 +247,27 @@ export class Builder {
     return this;
   }
 
-  set(builder: BuilderParameter<SetClause>): this {
-    const clause = new SetClauseStringBuilder('SET', this.parametersBag);
+  set(builder: BuilderParameter<SetClause<TVariables>>): this {
+    const clause = new SetClauseStringBuilder<TVariables>(
+      'SET',
+      this.parametersBag,
+    );
     builder(clause);
     this.#addClause(clause);
     return this;
   }
-  onMatchSet(builder: BuilderParameter<SetClause>): this {
-    const clause = new OnMatchClauseStringBuilder(this.parametersBag);
+  onMatchSet(builder: BuilderParameter<SetClause<TVariables>>): this {
+    const clause = new OnMatchClauseStringBuilder<TVariables>(
+      this.parametersBag,
+    );
     builder(clause);
     this.#addClause(clause);
     return this;
   }
-  onCreateSet(builder: BuilderParameter<SetClause>): this {
-    const clause = new OnCreateClauseStringBuilder(this.parametersBag);
+  onCreateSet(builder: BuilderParameter<SetClause<TVariables>>): this {
+    const clause = new OnCreateClauseStringBuilder<TVariables>(
+      this.parametersBag,
+    );
     builder(clause);
     this.#addClause(clause);
     return this;

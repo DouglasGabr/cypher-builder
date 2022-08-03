@@ -1,71 +1,48 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { CypherBuilderNodes } from '../types/labels-and-properties';
-
-declare module '../types/labels-and-properties' {
-  export interface CypherBuilderNodes {
-    Person: {
-      id: string;
-      name: string;
-      age: number;
-    };
-  }
-}
+import { Literal } from './literal';
 
 type VarType<Type, Value> = {
   __type: Type;
   __value: Value;
 };
 
-type NodeVarType<Label extends keyof CypherBuilderNodes> = VarType<
+export type NodeVarType<Label extends keyof CypherBuilderNodes> = VarType<
   'node',
   CypherBuilderNodes[Label]
 >;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyNodeVarType = NodeVarType<any>;
 
-type PrimitiveVarType<Primitive> = VarType<'primitive', Primitive>;
+export type PrimitiveVarType<Primitive> = VarType<'primitive', Primitive>;
 
-type VariableTypes<
-  New extends Record<string, unknown>,
-  Prev extends Record<string, unknown> = {},
-> = Omit<Prev, keyof New> & New;
-
-type A = VariableTypes<{ a: PrimitiveVarType<string> }>;
-type B = VariableTypes<
-  { b: PrimitiveVarType<number>; c: NodeVarType<'Person'> },
-  A
->;
-
-type AnyNodeVarType = NodeVarType<keyof CypherBuilderNodes>;
-type RootVariablesSetOptions<
-  Variables extends Record<string, VarType<unknown, unknown>>,
-> = {
-  [Key in keyof Variables & string]: Variables[Key]['__value'];
+export type Variables = {
+  [k: string]: VarType<unknown, unknown>;
 };
 
-type NodeVariablesSetOptions<
-  Variables extends Record<string, VarType<unknown, unknown>>,
-> = {
-  [Key in keyof Variables & string]: Variables[Key] extends AnyNodeVarType
+export type VariableTypes<
+  New extends Variables,
+  Prev extends Variables = {},
+> = Omit<Prev, keyof New> & New;
+
+type RootVariablesSetOptions<TVariables extends Variables> = {
+  [Key in keyof TVariables & string]: TVariables[Key]['__value'] | Literal;
+};
+
+type _NodeVariablesSetOptions<TVariables extends Variables> = {
+  [Key in keyof TVariables & string]: TVariables[Key] extends AnyNodeVarType
     ? RootVariablesSetOptions<{
-        [Sub in keyof Variables[Key]['__value'] &
+        [Sub in keyof TVariables[Key]['__value'] &
           string as `${Key}.${Sub}`]: PrimitiveVarType<
-          Variables[Key]['__value'][Sub]
+          TVariables[Key]['__value'][Sub]
         >;
       }>
     : never;
-}[keyof Variables & string];
+}[keyof TVariables & string];
+type NodeVariablesSetOptions<TVariables extends Variables> =
+  _NodeVariablesSetOptions<TVariables> extends never
+    ? {}
+    : _NodeVariablesSetOptions<TVariables>;
 
-type SetOptions<Variables extends Record<string, VarType<unknown, unknown>>> =
-  RootVariablesSetOptions<Variables> & NodeVariablesSetOptions<Variables>;
-
-class Test<Variables extends Record<string, VarType<unknown, unknown>>> {
-  set<Key extends keyof SetOptions<Variables>>(
-    key: Key,
-    value: SetOptions<Variables>[Key],
-  ) {
-    console.log('set', key, value);
-  }
-}
-
-const t = new Test<B>();
-
-t.set('c.age', 42);
+export type SetOptions<TVariables extends Variables> =
+  RootVariablesSetOptions<TVariables> & NodeVariablesSetOptions<TVariables>;
