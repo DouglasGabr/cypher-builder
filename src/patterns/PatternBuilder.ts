@@ -12,6 +12,7 @@ import {
 } from './Relationship';
 import { ShouldBeAdded } from '../types/should-be-added';
 import { Literal } from '../utils/literal';
+import { NodeVarType, Variables, VariableTypes } from '../utils/variable-types';
 
 type WithLiteral<T> = {
   [P in keyof T]: T[P] | Literal;
@@ -20,7 +21,7 @@ type WithLiteral<T> = {
 /**
  * @see [Patterns](https://neo4j.com/docs/cypher-manual/current/syntax/patterns/)
  */
-export class PatternBuilder {
+export class PatternBuilder<TVariables extends Variables> {
   protected patterns: StringBuilder[] = [];
   constructor(
     protected parametersBag: ParametersBag,
@@ -78,7 +79,19 @@ export class PatternBuilder {
     alias?: string,
     labels?: Label | Label[],
     properties?: Partial<WithLiteral<Properties>>,
-  ): this {
+  ): [typeof alias, typeof labels] extends [
+    infer Alias extends string,
+    keyof CypherBuilderNodes & string,
+  ]
+    ? PatternBuilder<
+        VariableTypes<
+          {
+            [K in Alias]: NodeVarType<Label>;
+          },
+          TVariables
+        >
+      >
+    : PatternBuilder<TVariables> {
     const _labels = Array.isArray(labels)
       ? labels
       : typeof labels === 'string'
@@ -144,8 +157,8 @@ export class PatternBuilder {
   }
 }
 
-export class PatternStringBuilder
-  extends PatternBuilder
+export class PatternStringBuilder<TVariables extends Variables>
+  extends PatternBuilder<TVariables>
   implements StringBuilder, ShouldBeAdded
 {
   get __shouldBeAdded() {

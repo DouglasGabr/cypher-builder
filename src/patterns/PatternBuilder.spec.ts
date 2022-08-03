@@ -40,10 +40,8 @@ describe('PatternBuilder', () => {
   });
   describe('path variable', () => {
     it('should build a path with variable', () => {
-      const builder = new PatternStringBuilder(new ParametersBag(), 'p')
-        .node('a')
-        .relationship()
-        .node('b');
+      const builder = new PatternStringBuilder(new ParametersBag(), 'p');
+      builder.node('a').relationship().node('b');
 
       expect(builder.build()).toBe('p = (a)--(b)');
     });

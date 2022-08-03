@@ -1,4 +1,6 @@
+import { ParametersBag } from '../parameters/ParametersBag';
 import { Node } from './Node';
+import { Properties } from './Properties';
 
 describe('Node', () => {
   describe.each([undefined, '', 'alias'])(
@@ -15,7 +17,16 @@ describe('Node', () => {
               const propertiesString = properties ? '{ id: $id }' : '';
               const expected = `(${aliasString}${labelsString}${propertiesString})`;
               it(`should build ${expected}`, () => {
-                const node = new Node(alias, labels, properties);
+                const node = new Node(
+                  alias,
+                  labels,
+                  properties
+                    ? Properties.fromRawProperties(
+                        properties,
+                        new ParametersBag(),
+                      )
+                    : undefined,
+                );
                 expect(node.build()).toBe(expected);
               });
             },

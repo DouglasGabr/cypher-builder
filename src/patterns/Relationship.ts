@@ -1,4 +1,13 @@
+import { ParametersBag } from '../parameters/ParametersBag';
+import { CypherBuilderNodes } from '../types/labels-and-properties';
 import { StringBuilder } from '../types/string-builder';
+import { Literal } from '../utils/literal';
+import { Node } from './Node';
+import { Properties } from './Properties';
+
+type WithLiteral<T> = {
+  [P in keyof T]: T[P] | Literal;
+};
 
 export type RelationshipDirection = 'in' | 'out' | 'either';
 
@@ -16,8 +25,9 @@ export class Relationship implements StringBuilder {
   private direction: RelationshipDirection;
   private alias: string;
   private types: string[];
-  private properties?: Record<string, string>;
+  private properties?: Properties;
   private limits?: RelationshipLimits;
+  private rightNode?: Node;
 
   #buildArrowsString(): ['<-', '-'] | ['-', '->'] | ['-', '-'] {
     switch (this.direction) {
@@ -35,14 +45,38 @@ export class Relationship implements StringBuilder {
     direction?: RelationshipDirection,
     alias?: string,
     types?: string[],
-    properties?: Record<string, string>,
+    properties?: Properties,
     limits?: RelationshipLimits,
+    private parametersBag = new ParametersBag(),
   ) {
     this.direction = direction ?? 'either';
     this.alias = alias ?? '';
     this.types = types ?? [];
     this.properties = properties;
     this.limits = limits;
+  }
+
+  node<
+    Label extends keyof CypherBuilderNodes & string,
+    Properties extends CypherBuilderNodes[Label],
+  >(
+    alias?: string,
+    labels?: Label | Label[],
+    properties?: Partial<WithLiteral<Properties>>,
+  ): Node {
+    const _labels = Array.isArray(labels)
+      ? labels
+      : typeof labels === 'string'
+      ? [labels]
+      : undefined;
+    this.rightNode = new Node(
+      alias,
+      _labels,
+      properties
+        ? Properties.fromRawProperties(properties, this.parametersBag)
+        : undefined,
+    );
+    return this.rightNode;
   }
 
   #buildLimitsString(): string {
@@ -92,12 +126,7 @@ export class Relationship implements StringBuilder {
   }
 
   #buildPropertiesString() {
-    if (this.properties) {
-      return ` { ${Object.entries(this.properties)
-        .map(([label, value]) => `${label}: ${value}`)
-        .join(', ')} }`;
-    }
-    return '';
+    return this.properties?.build() ?? '';
   }
 
   #buildTypesString() {
