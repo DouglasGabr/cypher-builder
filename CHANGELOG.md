@@ -1,10 +1,39 @@
+# 3.6.0 / 2022-08-31
+
+- feat(clauses): add CALL clause
+
+  ```typescript
+  import { Builder } from '@douglasgabr/cypher-builder';
+
+  const builder = new Builder()
+    .match((m) => {
+      m.node('a', 'User', { id: '1' });
+    })
+    .call((b) => {
+      b.with('a')
+        .match((m) => {
+          m.node('a').relationship().node('b', 'User', { id: '2' });
+        })
+        .return('b');
+    })
+    .return('a', 'b');
+  /**
+   * MATCH (a:User{ id: $a_id })
+   * CALL {
+   *   WITH a
+   *   MATCH (a)--(b:User{ id: $b_id })
+   *   RETURN b
+   * }
+   * RETURN a, b
+   */
+  ```
+
 # 3.5.0 / 2022-07-29
 
 - feat(patterns): ✨ add path name variable to MATCH
 
   ```typescript
   import { Builder } from '@douglasgabr/cypher-builder';
-  import { int } from 'neo4j-driver';
 
   new Builder().match('p', (m) => m.node('a').relationship().node('b'));
   // MATCH p = (a)--(b)
