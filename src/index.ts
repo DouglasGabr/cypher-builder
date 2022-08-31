@@ -28,6 +28,7 @@ import {
 } from './patterns/PatternBuilder';
 import { ShouldBeAdded } from './types/should-be-added';
 import { CreateClauseStringBuilder } from './clauses/create.clause';
+import { CallClauseStringBuilder } from './clauses/call.clause';
 export * from './types/labels-and-properties';
 export { literal } from './utils/literal';
 export type { Literal } from './utils/literal';
@@ -46,6 +47,7 @@ type BuilderParameter<T> = (builder: T) => unknown;
 export class Builder {
   private parametersBag = new ParametersBag();
   private clauses: StringBuilder[] = [];
+  private indent = 0;
 
   /**
    * @param pathName path name
@@ -264,6 +266,16 @@ export class Builder {
     return this;
   }
 
+  call(builder: BuilderParameter<Builder>): this {
+    const internalBuilder = new Builder();
+    internalBuilder.parametersBag = this.parametersBag;
+    internalBuilder.indent = this.indent + 2;
+    builder(internalBuilder);
+    const clause = new CallClauseStringBuilder(internalBuilder);
+    this.#addClause(clause);
+    return this;
+  }
+
   /**
    * @param items items to order by
    * @see [ORDER BY](https://neo4j.com/docs/cypher-manual/current/clauses/order-by/)
@@ -336,7 +348,9 @@ export class Builder {
   }
 
   build(): string {
-    return this.clauses.map((c) => c.build()).join('\n');
+    return this.clauses
+      .map((c) => ''.padStart(this.indent, ' ') + c.build())
+      .join('\n');
   }
 
   buildQueryObject() {

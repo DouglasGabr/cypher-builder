@@ -17,6 +17,7 @@ type ClausePrefix =
   | 'UNION ALL'
   | 'UNION'
   | 'UNWIND'
+  | 'CALL'
   | 'USING INDEX'
   | 'USING INDEX SEEK'
   | 'USING SCAN'

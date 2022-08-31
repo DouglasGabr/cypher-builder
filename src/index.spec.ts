@@ -36,4 +36,37 @@ describe('Builder', () => {
       expect(parameters.parameters.test).toBe('test2');
     });
   });
+  describe('CALL', () => {
+    it('should work with parameters', () => {
+      // arrange
+      const builder = new Builder()
+        .match((m) => {
+          m.node('a', 'User', { id: '1' });
+        })
+        .call((b) => {
+          b.with('a')
+            .match((m) => {
+              m.node('a').relationship().node('b', 'User', { id: '2' });
+            })
+            .return('b');
+        })
+        .return('a', 'b');
+      // act
+      const result = builder.buildQueryObject();
+      // assert
+      expect(result.query).toBe(
+        'MATCH (a:User{ id: $a_id })\n' +
+          'CALL {\n' +
+          '  WITH a\n' +
+          '  MATCH (a)--(b:User{ id: $b_id })\n' +
+          '  RETURN b\n' +
+          '}\n' +
+          'RETURN a, b',
+      );
+      expect(result.parameters).toEqual({
+        a_id: '1',
+        b_id: '2',
+      });
+    });
+  });
 });
