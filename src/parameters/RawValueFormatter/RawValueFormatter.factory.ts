@@ -24,16 +24,8 @@ export class RawValueFormatterFactory {
       return new BooleanRawValueFormatter(value);
     } else if (Array.isArray(value)) {
       return new ArrayRawValueFormatter(value);
-    } else if (typeof value === 'object' && value) {
-      return new ObjectRawValueFormatter(value);
     } else if (value instanceof neo4j.types.DateTime) {
       return new DateTimeRawValueFormatter(value);
-    } else if (value instanceof neo4j.types.Integer) {
-      return new IntRawValueFormatter(value);
-    } else if (value instanceof neo4j.types.Duration) {
-      return new DurationRawValueFormatter(value);
-    } else if (value instanceof neo4j.types.Point) {
-      return new PointRawValueFormatter(value);
     } else if (value instanceof neo4j.types.LocalTime) {
       return new LocalTimeRawValueFormatter(value);
     } else if (value instanceof neo4j.types.Time) {
@@ -42,6 +34,14 @@ export class RawValueFormatterFactory {
       return new LocalDateTimeRawValueFormatter(value);
     } else if (value instanceof neo4j.types.Date) {
       return new DateRawValueFormatter(value);
+    } else if (value instanceof neo4j.types.Integer) {
+      return new IntRawValueFormatter(value);
+    } else if (value instanceof neo4j.types.Duration) {
+      return new DurationRawValueFormatter(value);
+    } else if (value instanceof neo4j.types.Point) {
+      return new PointRawValueFormatter(value);
+    } else if (typeof value === 'object' && value) {
+      return new ObjectRawValueFormatter(value);
     }
     throw new Error(`Unsupported value type: ${typeof value}`);
   }
