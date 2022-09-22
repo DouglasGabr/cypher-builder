@@ -4,7 +4,11 @@ import { StringBuilder } from '../types/string-builder';
 import { Clause } from './base-clause';
 
 export class CallClause extends Clause {
-  constructor(protected internalBuilder: Builder) {
+  constructor(
+    protected internalBuilder: Builder,
+    protected inTransactions: boolean,
+    protected inTransactionsRowsCount: number | null,
+  ) {
     super('CALL');
   }
 }
@@ -18,6 +22,16 @@ export class CallClauseStringBuilder
     return this.internalBuilder.clauses.length > 0;
   }
   build(): string {
-    return `${this.prefix} {\n${this.internalBuilder.build()}\n}`;
+    const inTransactionsString = this.inTransactions
+      ? ` IN TRANSACTIONS${
+          typeof this.inTransactionsRowsCount === 'number' &&
+          this.inTransactionsRowsCount > 0
+            ? ` OF ${this.inTransactionsRowsCount} ROWS`
+            : ''
+        }`
+      : '';
+    return `${
+      this.prefix
+    } {\n${this.internalBuilder.build()}\n}${inTransactionsString}`;
   }
 }

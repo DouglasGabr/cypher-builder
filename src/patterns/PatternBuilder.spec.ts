@@ -2,19 +2,6 @@ import { ParametersBag } from '../parameters/ParametersBag';
 import { literal } from '../utils/literal';
 import { PatternStringBuilder } from './PatternBuilder';
 
-declare module '../types/labels-and-properties' {
-  export interface CypherBuilderNodes {
-    User: { id: string };
-    Post: { id: string };
-  }
-  export interface CypherBuilderRelationships {
-    PURCHASES: Record<string, never>;
-    IS_FRIEND: {
-      since: number;
-    };
-  }
-}
-
 describe('PatternBuilder', () => {
   describe('nodes', () => {
     it('should build node with only properties', () => {

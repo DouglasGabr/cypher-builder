@@ -1,3 +1,4 @@
+import { ShouldBeAdded } from '../../types/should-be-added';
 import { StringBuilder } from '../../types/string-builder';
 import { PlannerHintClauseStringBuilder } from './planner-hint.clause';
 
@@ -14,8 +15,9 @@ class UsingIndexSeekValueBuilder implements StringBuilder {
 
 export class UsingIndexSeekClauseStringBuilder
   extends PlannerHintClauseStringBuilder
-  implements StringBuilder
+  implements StringBuilder, ShouldBeAdded
 {
+  __shouldBeAdded = true;
   constructor(variable: string, label: string, fields: string[]) {
     super(
       'USING INDEX SEEK',

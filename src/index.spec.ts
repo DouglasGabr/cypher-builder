@@ -1,4 +1,22 @@
 import { Builder } from './index';
+import neo4j from 'neo4j-driver';
+
+declare module './types/labels-and-properties' {
+  export interface CypherBuilderNodes {
+    User: { id: string };
+    Post: { id: string; title: string };
+  }
+  export interface CypherBuilderRelationships {
+    PURCHASES: {};
+    IS_FRIEND: {
+      since: number;
+    };
+    PUBLISHED: {
+      id: string;
+      date: typeof neo4j.types.DateTime;
+    };
+  }
+}
 
 describe('Builder', () => {
   describe('MATCH', () => {
@@ -67,6 +85,100 @@ describe('Builder', () => {
         a_id: '1',
         b_id: '2',
       });
+    });
+    describe('IN TRANSACTIONS', () => {
+      it('should work without specifying row count', () => {
+        // arrange
+        const builder = new Builder();
+        // act
+        builder.callInTransactions((b) => {
+          b.match((m) => {
+            m.node('a', 'User', { id: '1' });
+          });
+        });
+        const result = builder.buildQueryObject();
+        // assert
+        expect(result.query).toBe(
+          'CALL {\n' + '  MATCH (a:User{ id: $a_id })\n' + '} IN TRANSACTIONS',
+        );
+      });
+      it('should work specifying row count', () => {
+        // arrange
+        const builder = new Builder();
+        // act
+        builder.callInTransactions(5, (b) => {
+          b.match((m) => {
+            m.node('a', 'User', { id: '1' });
+          });
+        });
+        const result = builder.buildQueryObject();
+        // assert
+        expect(result.query).toBe(
+          'CALL {\n' +
+            '  MATCH (a:User{ id: $a_id })\n' +
+            '} IN TRANSACTIONS OF 5 ROWS',
+        );
+      });
+    });
+  });
+  describe('USING INDEX', () => {
+    it('should build normally using node index hint', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.usingIndex('user', 'User', ['id']);
+      const result = builder.build();
+      // assert
+      expect(result).toBe('USING INDEX user:User(id)');
+    });
+    it('should build hint with composite index', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.usingIndex('post', 'Post', ['id', 'title']);
+      const result = builder.build();
+      // assert
+      expect(result).toBe('USING INDEX post:Post(id, title)');
+    });
+    it('should work with relationship properties', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.usingIndex('rel', 'PUBLISHED', ['id', 'date']);
+      const result = builder.build();
+      // assert
+      expect(result).toBe('USING INDEX rel:PUBLISHED(id, date)');
+    });
+  });
+  describe('USING SCAN', () => {
+    it('should work with node', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.usingScan('user', 'User').usingScan('post', 'Post');
+      const result = builder.build();
+      // assert
+      expect(result).toBe('USING SCAN user:User\nUSING SCAN post:Post');
+    });
+    it('should work with relationship', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.usingScan('rel', 'PUBLISHED');
+      const result = builder.build();
+      // assert
+      expect(result).toBe('USING SCAN rel:PUBLISHED');
+    });
+  });
+  describe('USING JOIN ON', () => {
+    it('should work with node', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.usingJoinOn('user');
+      const result = builder.build();
+      // assert
+      expect(result).toBe('USING JOIN ON user');
     });
   });
 });

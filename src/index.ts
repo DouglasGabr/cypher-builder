@@ -29,6 +29,14 @@ import {
 import { ShouldBeAdded } from './types/should-be-added';
 import { CreateClauseStringBuilder } from './clauses/create.clause';
 import { CallClauseStringBuilder } from './clauses/call.clause';
+import { UsingIndexClauseStringBuilder } from './clauses/planner-hint-clauses/using-index.clause';
+import {
+  CypherBuilderNodes,
+  CypherBuilderRelationships,
+} from './types/labels-and-properties';
+import { UsingScanClauseStringBuilder } from './clauses/planner-hint-clauses/using-scan.clause';
+import { UsingJoinOnClauseStringBuilder } from './clauses/planner-hint-clauses/using-join-on.clause';
+import { UsingIndexSeekClauseStringBuilder } from './clauses/planner-hint-clauses/using-index-seek.clause';
 export * from './types/labels-and-properties';
 export { literal } from './utils/literal';
 export type { Literal } from './utils/literal';
@@ -266,14 +274,54 @@ export class Builder {
     return this;
   }
 
-  call(builder: BuilderParameter<Builder>): this {
+  #call(
+    builder: BuilderParameter<Builder>,
+    inTransactions: boolean,
+    inTransactionsRowsCount: number | null,
+  ): this {
     const internalBuilder = new Builder();
     internalBuilder.parametersBag = this.parametersBag;
     internalBuilder.indent = this.indent + 2;
     builder(internalBuilder);
-    const clause = new CallClauseStringBuilder(internalBuilder);
+    const clause = new CallClauseStringBuilder(
+      internalBuilder,
+      inTransactions,
+      inTransactionsRowsCount,
+    );
     this.#addClause(clause);
     return this;
+  }
+
+  call(builder: BuilderParameter<Builder>): this {
+    return this.#call(builder, false, null);
+  }
+
+  /**
+   * @see {@link https://neo4j.com/docs/cypher-manual/current/clauses/call-subquery/#subquery-call-in-transactions CALL IN TRANSACTIONS}
+   * @example
+   * .callInTransactions(...)
+   * // CALL { ... } IN TRANSACTIONS
+   */
+  callInTransactions(builder: BuilderParameter<Builder>): this;
+  /**
+   * @see {@link https://neo4j.com/docs/cypher-manual/current/clauses/call-subquery/#_batching CALL IN TRANSACTIONS OF n ROWS}
+   * @example
+   * .callInTransactions(5, ...)
+   * // CALL { ... } IN TRANSACTIONS OF 5 ROWS
+   */
+  callInTransactions(
+    rowCount: number,
+    builder: BuilderParameter<Builder>,
+  ): this;
+  callInTransactions(
+    builderOrCount: BuilderParameter<Builder> | number,
+    builderFallback?: BuilderParameter<Builder>,
+  ): this {
+    const [count, builder] =
+      typeof builderOrCount === 'number'
+        ? [builderOrCount, builderFallback!]
+        : [null, builderOrCount];
+    return this.#call(builder, true, count);
   }
 
   /**
@@ -338,6 +386,66 @@ export class Builder {
     if (typeof alias === 'undefined') {
       return param;
     }
+    return this;
+  }
+
+  usingIndex<
+    Type extends keyof CypherBuilderRelationships & string,
+    Fields extends keyof CypherBuilderRelationships[Type] & string,
+  >(variable: string, type: Type, fields: Fields[]): this;
+  usingIndex<
+    Label extends keyof CypherBuilderNodes & string,
+    Fields extends keyof CypherBuilderNodes[Label] & string,
+  >(variable: string, label: Label, fields: Fields[]): this;
+  usingIndex(variable: string, labelOrType: string, fields: string[]): this {
+    const clause = new UsingIndexClauseStringBuilder(
+      variable,
+      labelOrType,
+      fields,
+    );
+    this.#addClause(clause);
+    return this;
+  }
+
+  usingIndexSeek<
+    Type extends keyof CypherBuilderRelationships & string,
+    Fields extends keyof CypherBuilderRelationships[Type] & string,
+  >(variable: string, type: Type, fields: Fields[]): this;
+  usingIndexSeek<
+    Label extends keyof CypherBuilderNodes & string,
+    Fields extends keyof CypherBuilderNodes[Label] & string,
+  >(variable: string, label: Label, fields: Fields[]): this;
+  usingIndexSeek(
+    variable: string,
+    labelOrType: string,
+    fields: string[],
+  ): this {
+    const clause = new UsingIndexSeekClauseStringBuilder(
+      variable,
+      labelOrType,
+      fields,
+    );
+    this.#addClause(clause);
+    return this;
+  }
+
+  usingScan<Type extends keyof CypherBuilderRelationships & string>(
+    variable: string,
+    type: Type,
+  ): this;
+  usingScan<Label extends keyof CypherBuilderNodes & string>(
+    variable: string,
+    label: Label,
+  ): this;
+  usingScan(variable: string, labelOrType: string): this {
+    const clause = new UsingScanClauseStringBuilder(variable, labelOrType);
+    this.#addClause(clause);
+    return this;
+  }
+
+  usingJoinOn(variable: string): this {
+    const clause = new UsingJoinOnClauseStringBuilder(variable);
+    this.#addClause(clause);
     return this;
   }
 

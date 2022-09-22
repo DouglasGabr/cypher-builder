@@ -2,13 +2,6 @@ import { literal } from '../..';
 import { ParametersBag } from '../../parameters/ParametersBag';
 import { SetClauseStringBuilder } from './set.clause';
 
-declare module '../../types/labels-and-properties' {
-  export interface CypherBuilderNodes {
-    User: { id: string };
-    Post: { id: string };
-  }
-}
-
 describe('SetClause', () => {
   describe('set', () => {
     it('should set field', () => {

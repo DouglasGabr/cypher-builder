@@ -5,8 +5,7 @@ type PlannerHintPrefix =
   | 'USING INDEX'
   | 'USING INDEX SEEK'
   | 'USING SCAN'
-  | 'USING JOIN ON'
-  | 'USING PERIODIC COMMIT';
+  | 'USING JOIN ON';
 
 export abstract class PlannerHintClause extends Clause {
   protected value: string;

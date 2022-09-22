@@ -2,19 +2,6 @@ import { ParametersBag } from '../parameters/ParametersBag';
 import { literal } from '../utils/literal';
 import { WhereClauseStringBuilder } from './where.clause';
 
-declare module '../types/labels-and-properties' {
-  export interface CypherBuilderNodes {
-    User: { id: string };
-    Post: { id: string };
-  }
-  export interface CypherBuilderRelationships {
-    PURCHASES: Record<string, never>;
-    IS_FRIEND: {
-      since: number;
-    };
-  }
-}
-
 describe('WhereClause', () => {
   describe('regular predicates', () => {
     it('should build or', () => {
