@@ -1,3 +1,9 @@
+# 4.0.0 / 2022-09-22
+
+## Breaking Changes
+
+The only breaking change in this major release is dropping support of Node 12, since it is no longer maintained.
+
 # 3.7.0 / 2022-09-22
 
 - feat(clauses): add [hint clauses](https://neo4j.com/docs/cypher-manual/current/query-tuning/using/) to query builder
