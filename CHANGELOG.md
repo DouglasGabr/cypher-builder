@@ -1,3 +1,12 @@
+# 3.7.0 / 2022-09-22
+
+- feat(clauses): add [hint clauses](https://neo4j.com/docs/cypher-manual/current/query-tuning/using/) to query builder
+  - `usingIndex`
+  - `usingIndexSeek`
+  - `usingScan`
+  - `usingJoinOn`
+  - [`callInTransactions`](https://neo4j.com/docs/cypher-manual/current/clauses/call-subquery/#subquery-call-in-transactions) (previously [`USING PERIODIC COMMIT`](https://neo4j.com/docs/cypher-manual/current/query-tuning/using/#query-using-periodic-commit-hint))
+
 # 3.6.0 / 2022-08-31
 
 - feat(clauses): add CALL clause
