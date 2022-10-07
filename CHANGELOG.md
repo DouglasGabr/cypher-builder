@@ -1,3 +1,19 @@
+# 4.1.0 / 2022-10-07
+
+- feat(clauses): add call procedure and yield clauses
+
+  ```typescript
+  import { Builder } from '@douglasgabr/cypher-builder';
+
+  const builder = new Builder()
+    .call('dbms.procedures()')
+    .yield('name', 'signature');
+  /**
+   * CALL dbms.procedures()
+   * YIELD name, signature
+   */
+  ```
+
 # 4.0.0 / 2022-09-22
 
 ## Breaking Changes
