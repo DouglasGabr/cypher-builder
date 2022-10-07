@@ -37,6 +37,8 @@ import {
 import { UsingScanClauseStringBuilder } from './clauses/planner-hint-clauses/using-scan.clause';
 import { UsingJoinOnClauseStringBuilder } from './clauses/planner-hint-clauses/using-join-on.clause';
 import { UsingIndexSeekClauseStringBuilder } from './clauses/planner-hint-clauses/using-index-seek.clause';
+import { CallProcedureClauseStringBuilder } from './clauses/call-procedure.clause';
+import { YieldClauseStringBuilder } from './clauses/result-clauses/yield.clause';
 export * from './types/labels-and-properties';
 export { literal } from './utils/literal';
 export type { Literal } from './utils/literal';
@@ -292,8 +294,23 @@ export class Builder {
     return this;
   }
 
-  call(builder: BuilderParameter<Builder>): this {
-    return this.#call(builder, false, null);
+  /**
+   * The CALL clause is used to call a procedure deployed in the database
+   * @see {@link https://neo4j.com/docs/cypher-manual/current/clauses/call/ CALL procedure}
+   */
+  call(procedure: string): this;
+  /**
+   * The CALL {} clause evaluates a subquery that returns some values
+   * @see {@link https://neo4j.com/docs/cypher-manual/current/clauses/call-subquery/ CALL subquery}
+   */
+  call(builder: BuilderParameter<Builder>): this;
+  call(builderOrProcedure: BuilderParameter<Builder> | string): this {
+    if (typeof builderOrProcedure === 'string') {
+      const clause = new CallProcedureClauseStringBuilder(builderOrProcedure);
+      this.#addClause(clause);
+      return this;
+    }
+    return this.#call(builderOrProcedure, false, null);
   }
 
   /**
@@ -322,6 +339,18 @@ export class Builder {
         ? [builderOrCount, builderFallback!]
         : [null, builderOrCount];
     return this.#call(builder, true, count);
+  }
+
+  /**
+   * The YIELD sub-clause is used to explicitly select which of the available
+   * result fields are returned as newly-bound variables from the procedure call
+   * to the user or for further processing by the remaining query
+   * @see {@link https://neo4j.com/docs/cypher-manual/current/clauses/call/#query-call-introduction CALL introduction}
+   */
+  yield(...items: Array<string | [string, string]>): this {
+    const clause = new YieldClauseStringBuilder();
+    this.addResultClause(items, clause);
+    return this;
   }
 
   /**

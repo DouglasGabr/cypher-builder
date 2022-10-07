@@ -181,4 +181,26 @@ describe('Builder', () => {
       expect(result).toBe('USING JOIN ON user');
     });
   });
+  describe('CALL procedure', () => {
+    it('should add CALL procedure clause', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.call('dbms.procedures()');
+      const result = builder.build();
+      // assert
+      expect(result).toBe('CALL dbms.procedures()');
+    });
+  });
+  describe('YIELD', () => {
+    it('should add YIELD clause', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.yield('a', 'b');
+      const result = builder.build();
+      // assert
+      expect(result).toBe('YIELD a, b');
+    });
+  });
 });

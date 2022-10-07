@@ -2,7 +2,7 @@ import { ShouldBeAdded } from '../../types/should-be-added';
 import { StringBuilder } from '../../types/string-builder';
 import { Clause } from '../base-clause';
 
-type ResultClausePrefix = 'RETURN' | 'WITH';
+type ResultClausePrefix = 'RETURN' | 'WITH' | 'YIELD';
 
 class ResultItem implements StringBuilder {
   constructor(private value: string | StringBuilder, private alias?: string) {}
