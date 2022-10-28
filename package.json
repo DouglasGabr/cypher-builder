@@ -2,11 +2,13 @@
   "name": "@douglasgabr/cypher-builder",
   "version": "4.1.0",
   "description": "Fluent CQL builder for Neo4j",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "sideEffects": false,
   "scripts": {
     "test": "jest",
-    "build": "tsc --project tsconfig.build.json",
+    "build": "tsc --project tsconfig.build.json --outDir dist/cjs && tsc --project tsconfig.build.json --outDir dist/esm --module es2020",
     "install-husky": "husky install"
   },
   "repository": {

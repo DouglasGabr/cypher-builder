@@ -1,5 +1,4 @@
 .github/
-src/
 coverage/
 .eslint*
 .prettier*
