@@ -1,3 +1,37 @@
+# 4.2.0 / 2022-10-28
+
+- refactor: add query runner object parameter to builder run function
+
+  ```typescript
+  import neo4j from 'neo4j-driver';
+  import { Builder } from '@douglasgabr/cypher-builder';
+
+  const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
+  const session = driver.session();
+
+  try {
+    await new Builder()
+      .match((m) => {
+        m.node('n');
+      })
+      .return('n')
+      .run(session);
+  } finally {
+    await session.close();
+  }
+  ```
+
+  This is deprecated:
+
+  ```typescript
+  // potentially unsafe, since `session.run` might use `this` internally
+  new Builder().run(session.run);
+  // correct way, but too verbose
+  new Builder().run(session.run.bind(session));
+  ```
+
+- refactor: publish ES modules and ship typescript source
+
 # 4.1.0 / 2022-10-07
 
 - feat(clauses): add call procedure and yield clauses
