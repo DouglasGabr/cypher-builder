@@ -1,56 +1,60 @@
-import { StringBuilder } from './types/string-builder';
+import { CallProcedureClauseStringBuilder } from './clauses/call-procedure.clause';
+import { CallClauseStringBuilder } from './clauses/call.clause';
+import { CreateClauseStringBuilder } from './clauses/create.clause';
+import { DeleteClauseStringBuilder } from './clauses/delete.clause';
 import { MatchClauseStringBuilder } from './clauses/match.clause';
 import { MergeClauseStringBuilder } from './clauses/merge.clause';
-import { ResultClauseStringBuilder } from './clauses/result-clauses/result.clause';
-import { ReturnClauseStringBuilder } from './clauses/result-clauses/return.clause';
-import { WithClauseStringBuilder } from './clauses/result-clauses/with.clause';
-import { UnionClauseStringBuilder } from './clauses/union.clause';
-import { WhereClause, WhereClauseStringBuilder } from './clauses/where.clause';
-import { ParametersBag } from './parameters/ParametersBag';
-import { SkipClauseStringBuilder } from './clauses/pagination-clauses/skip.clause';
-import { LimitClauseStringBuilder } from './clauses/pagination-clauses/limit.clause';
 import { OptionalMatchClauseStringBuilder } from './clauses/optional-match.clause';
-import { UnwindClauseStringBuilder } from './clauses/unwind.clause';
-import {
-  SetClause,
-  SetClauseStringBuilder,
-} from './clauses/set-clauses/set.clause';
-import { OnMatchClauseStringBuilder } from './clauses/set-clauses/on-match.clause';
-import { OnCreateClauseStringBuilder } from './clauses/set-clauses/on-create.clause';
 import {
   OrderByClauseStringBuilder,
   OrderByItem,
 } from './clauses/order-by.clause';
-import { DeleteClauseStringBuilder } from './clauses/delete.clause';
+import { LimitClauseStringBuilder } from './clauses/pagination-clauses/limit.clause';
+import { SkipClauseStringBuilder } from './clauses/pagination-clauses/skip.clause';
+import { UsingIndexSeekClauseStringBuilder } from './clauses/planner-hint-clauses/using-index-seek.clause';
+import { UsingIndexClauseStringBuilder } from './clauses/planner-hint-clauses/using-index.clause';
+import { UsingJoinOnClauseStringBuilder } from './clauses/planner-hint-clauses/using-join-on.clause';
+import { UsingScanClauseStringBuilder } from './clauses/planner-hint-clauses/using-scan.clause';
+import { ResultClauseStringBuilder } from './clauses/result-clauses/result.clause';
+import { ReturnClauseStringBuilder } from './clauses/result-clauses/return.clause';
+import { WithClauseStringBuilder } from './clauses/result-clauses/with.clause';
+import { YieldClauseStringBuilder } from './clauses/result-clauses/yield.clause';
+import { OnCreateClauseStringBuilder } from './clauses/set-clauses/on-create.clause';
+import { OnMatchClauseStringBuilder } from './clauses/set-clauses/on-match.clause';
+import {
+  SetClause,
+  SetClauseStringBuilder,
+} from './clauses/set-clauses/set.clause';
+import { UnionClauseStringBuilder } from './clauses/union.clause';
+import { UnwindClauseStringBuilder } from './clauses/unwind.clause';
+import { WhereClause, WhereClauseStringBuilder } from './clauses/where.clause';
+import { ParametersBag } from './parameters/ParametersBag';
 import {
   PatternBuilder,
   PatternStringBuilder,
 } from './patterns/PatternBuilder';
-import { ShouldBeAdded } from './types/should-be-added';
-import { CreateClauseStringBuilder } from './clauses/create.clause';
-import { CallClauseStringBuilder } from './clauses/call.clause';
-import { UsingIndexClauseStringBuilder } from './clauses/planner-hint-clauses/using-index.clause';
 import {
   CypherBuilderNodes,
   CypherBuilderRelationships,
 } from './types/labels-and-properties';
-import { UsingScanClauseStringBuilder } from './clauses/planner-hint-clauses/using-scan.clause';
-import { UsingJoinOnClauseStringBuilder } from './clauses/planner-hint-clauses/using-join-on.clause';
-import { UsingIndexSeekClauseStringBuilder } from './clauses/planner-hint-clauses/using-index-seek.clause';
-import { CallProcedureClauseStringBuilder } from './clauses/call-procedure.clause';
-import { YieldClauseStringBuilder } from './clauses/result-clauses/yield.clause';
+import { ShouldBeAdded } from './types/should-be-added';
+import { StringBuilder } from './types/string-builder';
+
+export type { OrderByDirection, OrderByItem } from './clauses/order-by.clause';
+export type { PatternBuilder } from './patterns/PatternBuilder';
+export type {
+  RelationshipDirection,
+  RelationshipLimits,
+} from './patterns/Relationship';
 export * from './types/labels-and-properties';
 export { literal } from './utils/literal';
 export type { Literal } from './utils/literal';
 
-type QueryRunner<T> = (query: string, parameters?: unknown) => Promise<T>;
-
-export type {
-  RelationshipLimits,
-  RelationshipDirection,
-} from './patterns/Relationship';
-export type { PatternBuilder } from './patterns/PatternBuilder';
-export type { OrderByDirection, OrderByItem } from './clauses/order-by.clause';
+type QueryRunnerFunction<T> = (
+  query: string,
+  parameters?: unknown,
+) => Promise<T>;
+type QueryRunner<T> = { run: QueryRunnerFunction<T> };
 
 type BuilderParameter<T> = (builder: T) => unknown;
 
@@ -497,8 +501,17 @@ export class Builder {
     };
   }
 
-  run<T>(runner: QueryRunner<T>) {
+  run<T>(runner: QueryRunner<T>): Promise<T>;
+  /**
+   * @deprecated use `run(runner: QueryRunner<T>)` instead
+   */
+  run<T>(runnerFn: QueryRunnerFunction<T>): Promise<T>;
+  async run<T>(runner: QueryRunnerFunction<T> | QueryRunner<T>) {
     const { query, parameters } = this.buildQueryObject();
-    return runner(query, parameters);
+    if (typeof runner === 'function') {
+      return runner(query, parameters);
+    } else {
+      return runner.run(query, parameters);
+    }
   }
 }

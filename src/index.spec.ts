@@ -203,4 +203,38 @@ describe('Builder', () => {
       expect(result).toBe('YIELD a, b');
     });
   });
+  describe('run', () => {
+    it('should run query with runner function (deprecated)', async () => {
+      // arrange
+      const builder = new Builder().match((m) => m.node('n'));
+      const runner = jest.fn().mockResolvedValue({
+        records: [],
+      });
+      // act
+      const result = await builder.run(runner);
+      // assert
+      expect(result).toEqual({
+        records: [],
+      });
+      const { query, parameters } = builder.buildQueryObject();
+      expect(runner).toBeCalledWith(query, parameters);
+    });
+    it('should run query with runner object (like session and transaction)', async () => {
+      // arrange
+      const builder = new Builder().match((m) => m.node('n'));
+      const runner = {
+        run: jest.fn().mockResolvedValue({
+          records: [],
+        }),
+      };
+      // act
+      const result = await builder.run(runner);
+      // assert
+      expect(result).toEqual({
+        records: [],
+      });
+      const { query, parameters } = builder.buildQueryObject();
+      expect(runner.run).toBeCalledWith(query, parameters);
+    });
+  });
 });
