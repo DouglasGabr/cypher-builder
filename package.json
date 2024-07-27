@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/DouglasGabr/cypher-builder#readme",
   "devDependencies": {
-    "@commitlint/cli": "^16.0.0",
+    "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^16.0.0",
     "@swc/core": "^1.2.163",
     "@swc/jest": "^0.2.20",
