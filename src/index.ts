@@ -503,6 +503,9 @@ export class Builder {
 
   /**
    * Generates a query with parameters as literals, useful for debug purposes
+   * 
+   * WARNING: this method is not safe for production use, as it can lead to CypherQL injection
+   * 
    * @returns query with parameters interpolated into the query as literals
    */
   interpolate(): string {
