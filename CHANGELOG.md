@@ -1,3 +1,17 @@
+# 4.3.0 / 2024-11-28
+
+- feat: add `interpolate` method.
+  ```typescript
+  import { Builder } from '@douglasgabr/cypher-builder';
+
+  const builder = new Builder()
+    .match((m) => {
+      m.node('n', 'User', { id: '1' });
+    });
+  const query = builder.interpolate();
+  // MATCH (n:User{ id: "1" })
+  ```
+
 # 4.2.0 / 2022-10-28
 
 - refactor: add query runner object parameter to builder run function
