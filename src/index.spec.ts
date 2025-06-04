@@ -203,6 +203,17 @@ describe('Builder', () => {
       expect(result).toBe('YIELD a, b');
     });
   });
+  describe('REMOVE', () => {
+    it('should add REMOVE clause', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.remove('a.prop', ['b', 'User'], ['c', ['User', 'Post']]);
+      const result = builder.build();
+      // assert
+      expect(result).toBe('REMOVE a.prop, b:User, c:User:Post');
+    });
+  });
   describe('run', () => {
     it('should run query with runner function (deprecated)', async () => {
       // arrange

@@ -13,6 +13,7 @@ type ClausePrefix =
   | 'OPTIONAL MATCH'
   | 'ORDER BY'
   | 'DELETE'
+  | 'REMOVE'
   | 'DETACH DELETE'
   | 'UNION ALL'
   | 'UNION'

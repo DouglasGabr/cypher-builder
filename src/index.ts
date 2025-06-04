@@ -15,6 +15,10 @@ import { UsingIndexSeekClauseStringBuilder } from './clauses/planner-hint-clause
 import { UsingIndexClauseStringBuilder } from './clauses/planner-hint-clauses/using-index.clause';
 import { UsingJoinOnClauseStringBuilder } from './clauses/planner-hint-clauses/using-join-on.clause';
 import { UsingScanClauseStringBuilder } from './clauses/planner-hint-clauses/using-scan.clause';
+import {
+  RemoveClauseStringBuilder,
+  RemoveItemParameter,
+} from './clauses/remove.clause';
 import { ResultClauseStringBuilder } from './clauses/result-clauses/result.clause';
 import { ReturnClauseStringBuilder } from './clauses/result-clauses/return.clause';
 import { WithClauseStringBuilder } from './clauses/result-clauses/with.clause';
@@ -397,6 +401,23 @@ export class Builder {
   }
 
   /**
+   *
+   * @param items items to remove (e.g. properties, labels, etc.)
+   * @see [REMOVE](https://neo4j.com/docs/cypher-manual/current/clauses/remove/)
+   * @example
+   * .remove(
+   *   'node1.name',
+   *   ['node1', 'Label'],
+   *   ['node1', ['Label1', 'Label2']]
+   * )
+   * // REMOVE node1.name, node1:Label, node1:Label1:Label2
+   */
+  remove(...items: RemoveItemParameter[]): this {
+    this.#addClause(new RemoveClauseStringBuilder(items));
+    return this;
+  }
+
+  /**
    * Add a value to the query parameters
    * @param value value to be provided as a parameter
    * @returns string with the generated parameter name
@@ -503,9 +524,9 @@ export class Builder {
 
   /**
    * Generates a query with parameters as literals, useful for debug purposes
-   * 
+   *
    * WARNING: this method is not safe for production use, as it can lead to CypherQL injection
-   * 
+   *
    * @returns query with parameters interpolated into the query as literals
    */
   interpolate(): string {
