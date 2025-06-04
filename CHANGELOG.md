@@ -1,13 +1,36 @@
-# 4.3.0 / 2024-11-28
+# 4.4.0 / 2025-06-04
 
-- feat: add `interpolate` method.
+- feat: add [`REMOVE`](https://neo4j.com/docs/cypher-manual/current/clauses/remove/) clause support
+
   ```typescript
   import { Builder } from '@douglasgabr/cypher-builder';
 
   const builder = new Builder()
     .match((m) => {
       m.node('n', 'User', { id: '1' });
-    });
+    })
+    .remove('n.name', 'n.age');
+  // MATCH (n:User{ id: "1" })
+  // REMOVE n.name, n.age
+  const builder = new Builder()
+    .match((m) => {
+      m.node('n', 'User', { id: '1' });
+    })
+    .remove(['n', 'User'], ['n', ['Admin', 'Label']]); // labels are type-checked
+  // MATCH (n:User{ id: "1" })
+  // REMOVE n:User, n:Admin:Label
+  ```
+
+# 4.3.0 / 2024-11-28
+
+- feat: add `interpolate` method.
+
+  ```typescript
+  import { Builder } from '@douglasgabr/cypher-builder';
+
+  const builder = new Builder().match((m) => {
+    m.node('n', 'User', { id: '1' });
+  });
   const query = builder.interpolate();
   // MATCH (n:User{ id: "1" })
   ```
