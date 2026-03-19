@@ -1,3 +1,21 @@
+# 4.5.0 / 2026-03-19
+
+- feat: add Cypher clause support with builder and tests
+
+  ```typescript
+  import { Builder } from '@douglasgabr/cypher-builder';
+
+  const builder = new Builder()
+    .cypherOptions(25, 'param1=value')
+    .match((m) => {
+      m.node('n', 'User', { id: '1' });
+    })
+    .return('n');
+  // CYPHER 25 param1=value
+  // MATCH (n:User{ id: $n_id })
+  // REMOVE n.name, n.age
+  ```
+
 # 4.4.0 / 2025-06-04
 
 - feat: add [`REMOVE`](https://neo4j.com/docs/cypher-manual/current/clauses/remove/) clause support
@@ -10,14 +28,14 @@
       m.node('n', 'User', { id: '1' });
     })
     .remove('n.name', 'n.age');
-  // MATCH (n:User{ id: "1" })
+  // MATCH (n:User{ id: $n_id })
   // REMOVE n.name, n.age
   const builder = new Builder()
     .match((m) => {
       m.node('n', 'User', { id: '1' });
     })
     .remove(['n', 'User'], ['n', ['Admin', 'Label']]); // labels are type-checked
-  // MATCH (n:User{ id: "1" })
+  // MATCH (n:User{ id: $n_id })
   // REMOVE n:User, n:Admin:Label
   ```
 
@@ -172,7 +190,6 @@ The only breaking change in this major release is dropping support of Node 12, s
 # 3.3.0 / 2022-01-07
 
 - feat(builder): ✨ add `addParameter` to builder
-
   - enable option to add custom arbitrary parameters to builder
 
   ```typescript
