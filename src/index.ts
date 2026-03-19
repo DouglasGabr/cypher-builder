@@ -1,6 +1,10 @@
 import { CallProcedureClauseStringBuilder } from './clauses/call-procedure.clause';
 import { CallClauseStringBuilder } from './clauses/call.clause';
 import { CreateClauseStringBuilder } from './clauses/create.clause';
+import {
+  CypherClauseStringBuilder,
+  CypherVersion,
+} from './clauses/cypher.clause';
 import { DeleteClauseStringBuilder } from './clauses/delete.clause';
 import { MatchClauseStringBuilder } from './clauses/match.clause';
 import { MergeClauseStringBuilder } from './clauses/merge.clause';
@@ -53,6 +57,8 @@ export type {
 export * from './types/labels-and-properties';
 export { literal } from './utils/literal';
 export type { Literal } from './utils/literal';
+
+export { CypherVersion };
 
 type QueryRunnerFunction<T> = (
   query: string,
@@ -499,6 +505,34 @@ export class Builder {
 
   usingJoinOn(variable: string): this {
     const clause = new UsingJoinOnClauseStringBuilder(variable);
+    this.#addClause(clause);
+    return this;
+  }
+
+  /**
+   * Add Cypher version (optional) and options to the query.
+   *
+   * It must be called at the beginning of the query.
+   *
+   * @param version Cypher version to use for the query
+   * @param options additional cypher options to use for the query
+   *
+   * @see [Select Cypher Version](https://neo4j.com/docs/cypher-manual/current/queries/select-version/)
+   * @see [Query tuning](https://neo4j.com/docs/cypher-manual/current/planning-and-tuning/query-tuning/)
+   */
+  cypherOptions(version: CypherVersion, ...options: string[]): this;
+  cypherOptions(...options: [string, ...string[]]): this;
+  cypherOptions(
+    versionOrOption: CypherVersion | string,
+    ...options: string[]
+  ): this {
+    const version =
+      typeof versionOrOption === 'number' ? versionOrOption : undefined;
+    const allOptions =
+      typeof versionOrOption === 'string'
+        ? [versionOrOption, ...options]
+        : options;
+    const clause = new CypherClauseStringBuilder(version, allOptions);
     this.#addClause(clause);
     return this;
   }

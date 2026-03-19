@@ -279,4 +279,33 @@ describe('Builder', () => {
       );
     });
   });
+  describe('.cypherOptions', () => {
+    it('should add raw Cypher to the query', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.cypherOptions(25, 'option1=value', 'option2=test');
+      const result = builder.build();
+      // assert
+      expect(result).toBe('CYPHER 25 option1=value option2=test');
+    });
+    it('should add raw Cypher with only version', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.cypherOptions(5);
+      const result = builder.build();
+      // assert
+      expect(result).toBe('CYPHER 5');
+    });
+    it('should add raw Cypher with only options', () => {
+      // arrange
+      const builder = new Builder();
+      // act
+      builder.cypherOptions('option1=value');
+      const result = builder.build();
+      // assert
+      expect(result).toBe('CYPHER option1=value');
+    });
+  });
 });

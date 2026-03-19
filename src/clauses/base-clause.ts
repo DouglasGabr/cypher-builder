@@ -24,7 +24,8 @@ type ClausePrefix =
   | 'USING INDEX SEEK'
   | 'USING SCAN'
   | 'USING JOIN ON'
-  | 'USING PERIODIC COMMIT';
+  | 'USING PERIODIC COMMIT'
+  | 'CYPHER';
 
 export abstract class Clause {
   constructor(protected prefix: ClausePrefix) {}
