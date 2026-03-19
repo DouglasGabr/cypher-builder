@@ -53,8 +53,8 @@ class LabelComparator implements StringBuilder {
   }
 }
 
-const predicateFunctionNames = ['all', 'any', 'none', 'single'] as const;
-type PredicateFunctionName = typeof predicateFunctionNames[number];
+const _predicateFunctionNames = ['all', 'any', 'none', 'single'] as const;
+type PredicateFunctionName = typeof _predicateFunctionNames[number];
 class PredicateFunctionComparator implements StringBuilder {
   constructor(
     private functionName: PredicateFunctionName,
