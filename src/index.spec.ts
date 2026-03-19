@@ -228,7 +228,7 @@ describe('Builder', () => {
         records: [],
       });
       const { query, parameters } = builder.buildQueryObject();
-      expect(runner).toBeCalledWith(query, parameters);
+      expect(runner).toHaveBeenCalledWith(query, parameters);
     });
     it('should run query with runner object (like session and transaction)', async () => {
       // arrange
@@ -245,7 +245,7 @@ describe('Builder', () => {
         records: [],
       });
       const { query, parameters } = builder.buildQueryObject();
-      expect(runner.run).toBeCalledWith(query, parameters);
+      expect(runner.run).toHaveBeenCalledWith(query, parameters);
     });
   });
   describe('interpolate', () => {
