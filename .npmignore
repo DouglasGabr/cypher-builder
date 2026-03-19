@@ -9,3 +9,4 @@ types.d.ts
 images/
 commitlint.config.js
 .husky/
+eslint.config.mjs
